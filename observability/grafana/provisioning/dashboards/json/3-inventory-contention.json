@@ -1,0 +1,98 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Seat Reservation & Concurrency Contention",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 2,
+      "title": "Hold Requests: Success (200/201) vs Conflict (409)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/inventory/holds.*\", status_code=~\"2..\"}[1m]))",
+          "legendFormat": "Holds Won (2xx)"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/inventory/holds.*\", status_code=\"409\"}[1m]))",
+          "legendFormat": "Collisions (409 Conflict)"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "s"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 3,
+      "title": "Hold Execution Latency (p95, p99)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "histogram_quantile(0.95, sum(rate(ticket_in_http_request_duration_seconds_bucket{route=~\"/api/v1/inventory/holds.*\"}[1m])) by (le))",
+          "legendFormat": "p95 Latency"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "histogram_quantile(0.99, sum(rate(ticket_in_http_request_duration_seconds_bucket{route=~\"/api/v1/inventory/holds.*\"}[1m])) by (le))",
+          "legendFormat": "p99 Latency"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+      "id": 4,
+      "title": "Hold Modes Comparison (Specific Seats vs Auto-Allocation)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=\"/api/v1/inventory/holds\"}[1m]))",
+          "legendFormat": "Specific Seat Holds"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=\"/api/v1/inventory/holds/auto\"}[1m]))",
+          "legendFormat": "Auto-Allocation Holds"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ticket-in", "inventory", "contention"],
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "3. Seat Inventory & Concurrency Contention",
+  "uid": "ticket-in-inventory"
+}

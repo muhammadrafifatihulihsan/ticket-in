@@ -1,0 +1,63 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Transactional Outbox & Kafka Messaging",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 2,
+      "title": "Outbox Relay Event Throughput",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/payments/webhook.*\"}[1m]))",
+          "legendFormat": "Outbox Events Dispatched"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 3,
+      "title": "Inbox Message Consumption & Ticket Issuance",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/tickets.*\", method=\"GET\"}[1m]))",
+          "legendFormat": "Ticket Queries / Issuance Verifications"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ticket-in", "outbox", "kafka"],
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "5. Transactional Outbox & Async Messaging",
+  "uid": "ticket-in-outbox"
+}

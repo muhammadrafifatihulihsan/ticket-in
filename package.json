@@ -24,6 +24,15 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
     "db:check-invariants": "tsx scripts/invariant-check.ts",
+    "loadtest:a": "k6 run loadtest/scenarios/scenario-a-browse.js",
+    "loadtest:b": "k6 run loadtest/scenarios/scenario-b-queue-surge.js",
+    "loadtest:c": "k6 run loadtest/scenarios/scenario-c-seat-hold-battle.js",
+    "loadtest:d": "k6 run loadtest/scenarios/scenario-d-end-to-end-war.js",
+    "loadtest:e": "k6 run loadtest/scenarios/scenario-e-hold-expiry.js",
+    "loadtest:f": "k6 run loadtest/scenarios/scenario-f-webhook-flood.js",
+    "chaos:setup": "tsx scripts/chaos/toxiproxy-setup.ts",
+    "chaos:redis": "tsx scripts/chaos/chaos-redis-disconnect.ts",
+    "chaos:db": "tsx scripts/chaos/chaos-db-latency.ts",
     "depcruise": "depcruise --config .dependency-cruiser.cjs src"
   },
   "dependencies": {

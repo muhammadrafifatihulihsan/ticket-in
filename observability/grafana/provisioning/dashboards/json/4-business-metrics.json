@@ -1,0 +1,93 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Business Conversion Funnel",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 2,
+      "title": "Checkout & Order Creation Throughput",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=\"/api/v1/orders\", method=\"POST\"}[1m]))",
+          "legendFormat": "Orders Created / sec"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 3,
+      "title": "Payment Webhook Receipts (Processed vs Rejected)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/payments/webhook.*\", status_code=\"200\"}[1m]))",
+          "legendFormat": "Processed Webhooks"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/payments/webhook.*\", status_code=~\"4..\"}[1m]))",
+          "legendFormat": "Invalid HMAC / Rejected"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "reqps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 9 },
+      "id": 4,
+      "title": "Gate Check-in & Ticket Verification Rate",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/tickets/.*/verify\", status_code=\"200\"}[1m]))",
+          "legendFormat": "Valid Admissions (200)"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "expr": "sum(rate(ticket_in_http_requests_total{route=~\"/api/v1/tickets/.*/verify\", status_code=\"409\"}[1m]))",
+          "legendFormat": "Double Check-in Attempts (409)"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["ticket-in", "business", "revenue"],
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "4. Business Metrics & Revenue Funnel",
+  "uid": "ticket-in-business"
+}
