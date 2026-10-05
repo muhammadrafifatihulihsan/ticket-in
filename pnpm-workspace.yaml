@@ -1,3 +1,6 @@
+packages:
+  - '.'
+
 allowBuilds:
   '@confluentinc/kafka-javascript': true
   argon2: true
