@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { ConflictError } from '../../../platform/errors/problem-details.js';
 import type {
+  AutoHoldParams,
   HoldSeatsParams,
   HoldSeatsResult,
   InventoryRepositoryPort,
@@ -88,6 +89,56 @@ export class InMemoryInventoryRepository implements InventoryRepositoryPort {
     const createdHolds: SeatHoldDetail[] = [];
     for (const seatId of params.seatIds) {
       const seat = this.seats.find((s) => s.id === seatId)!;
+      seat.status = 'HELD';
+      seat.heldBy = params.userId;
+      seat.expiresAt = expiresAt;
+      seat.version += 1;
+
+      const hold: SeatHoldDetail = {
+        id: randomUUID(),
+        seatId: seat.id,
+        seatNumber: seat.seatNumber,
+        userId: params.userId,
+        status: 'ACTIVE',
+        expiresAt,
+        createdAt: now,
+      };
+
+      this.holds.push(hold);
+      createdHolds.push(hold);
+    }
+
+    return {
+      holds: createdHolds,
+      expiresAt,
+    };
+  }
+
+  async autoHoldSeatsByCategory(params: AutoHoldParams): Promise<HoldSeatsResult> {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + params.holdTtlSeconds * 1000);
+
+    const availableSeats = this.seats.filter((s) => {
+      if (s.eventId !== params.eventId || s.categoryId !== params.categoryId) return false;
+      if (s.status === 'SOLD') return false;
+      if (s.status === 'HELD') {
+        const activeHold = this.holds.find(
+          (h) => h.seatId === s.id && h.status === 'ACTIVE' && h.expiresAt > now,
+        );
+        if (activeHold) return false;
+      }
+      return true;
+    });
+
+    if (availableSeats.length < params.quantity) {
+      throw new ConflictError('Insufficient seats available in the selected category.');
+    }
+
+    availableSeats.sort((a, b) => a.seatNumber.localeCompare(b.seatNumber));
+    const selectedSeats = availableSeats.slice(0, params.quantity);
+
+    const createdHolds: SeatHoldDetail[] = [];
+    for (const seat of selectedSeats) {
       seat.status = 'HELD';
       seat.heldBy = params.userId;
       seat.expiresAt = expiresAt;

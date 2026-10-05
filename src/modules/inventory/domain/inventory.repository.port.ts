@@ -12,10 +12,19 @@ export interface HoldSeatsResult {
   expiresAt: Date;
 }
 
+export interface AutoHoldParams {
+  eventId: string;
+  userId: string;
+  categoryId: string;
+  quantity: number;
+  holdTtlSeconds: number;
+}
+
 export interface InventoryRepositoryPort {
   findSeatsByEventId(eventId: string): Promise<SeatLayoutItem[]>;
   countUserActiveSeats(eventId: string, userId: string): Promise<number>;
   holdSpecificSeats(params: HoldSeatsParams): Promise<HoldSeatsResult>;
+  autoHoldSeatsByCategory(params: AutoHoldParams): Promise<HoldSeatsResult>;
   releaseSeatHold(holdId: string, userId: string): Promise<boolean>;
   releaseExpiredHolds(now: Date): Promise<number>;
   findHoldById(holdId: string): Promise<SeatHoldDetail | null>;

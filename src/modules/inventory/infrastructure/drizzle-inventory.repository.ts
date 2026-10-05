@@ -4,6 +4,7 @@ import * as schema from '../../../platform/db/schema.js';
 import { ConflictError } from '../../../platform/errors/problem-details.js';
 import { type IdGenerator, UuidV7Generator } from '../../../platform/id/id-generator.js';
 import type {
+  AutoHoldParams,
   HoldSeatsParams,
   HoldSeatsResult,
   InventoryRepositoryPort,
@@ -112,6 +113,69 @@ export class DrizzleInventoryRepository implements InventoryRepositoryPort {
         id: h.id,
         seatId: h.seatId,
         seatNumber: updatedSeats[index]?.seatNumber ?? '',
+        userId: h.userId,
+        status: 'ACTIVE',
+        expiresAt: h.expiresAt,
+        createdAt: h.createdAt,
+      }));
+
+      return {
+        holds: holdDetails,
+        expiresAt,
+      };
+    });
+  }
+
+  async autoHoldSeatsByCategory(params: AutoHoldParams): Promise<HoldSeatsResult> {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + params.holdTtlSeconds * 1000);
+
+    return await this.db.transaction(async (tx) => {
+      const candidateResult = await tx.execute(sql`
+        SELECT id, seat_number AS "seatNumber"
+        FROM seats
+        WHERE event_id = ${params.eventId}
+          AND category_id = ${params.categoryId}
+          AND status = 'AVAILABLE'
+        ORDER BY seat_number ASC
+        LIMIT ${params.quantity}
+        FOR UPDATE SKIP LOCKED
+      `);
+
+      const candidateSeats = candidateResult.rows as unknown as Array<{ id: string; seatNumber: string }>;
+
+      if (candidateSeats.length < params.quantity) {
+        throw new ConflictError('Insufficient seats available in the selected category.');
+      }
+
+      const allocatedSeatIds = candidateSeats.map((s) => s.id);
+
+      await tx
+        .update(schema.seats)
+        .set({
+          status: 'HELD',
+          heldBy: params.userId,
+          expiresAt,
+          version: sql`${schema.seats.version} + 1`,
+          updatedAt: now,
+        })
+        .where(inArray(schema.seats.id, allocatedSeatIds));
+
+      const holdInserts = candidateSeats.map((s) => ({
+        id: this.idGen.generate(),
+        seatId: s.id,
+        userId: params.userId,
+        status: 'ACTIVE',
+        expiresAt,
+        createdAt: now,
+      }));
+
+      await tx.insert(schema.seatHolds).values(holdInserts);
+
+      const holdDetails: SeatHoldDetail[] = holdInserts.map((h, index) => ({
+        id: h.id,
+        seatId: h.seatId,
+        seatNumber: candidateSeats[index]?.seatNumber ?? '',
         userId: h.userId,
         status: 'ACTIVE',
         expiresAt: h.expiresAt,

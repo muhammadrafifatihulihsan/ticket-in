@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { JwtTokenService } from '../../../../src/modules/identity/infrastructure/jwt-token-service.js';
+import { AutoHoldSeatsUseCase } from '../../../../src/modules/inventory/application/auto-hold-seats.use-case.js';
 import { GetEventSeatsUseCase } from '../../../../src/modules/inventory/application/get-event-seats.use-case.js';
 import { HoldSpecificSeatsUseCase } from '../../../../src/modules/inventory/application/hold-specific-seats.use-case.js';
 import { ReleaseHoldUseCase } from '../../../../src/modules/inventory/application/release-hold.use-case.js';
@@ -52,6 +53,7 @@ describe('Inventory Fastify Routes', () => {
 
     const getEventSeatsUseCase = new GetEventSeatsUseCase(repo);
     const holdSpecificSeatsUseCase = new HoldSpecificSeatsUseCase(repo);
+    const autoHoldSeatsUseCase = new AutoHoldSeatsUseCase(repo);
     const releaseHoldUseCase = new ReleaseHoldUseCase(repo);
 
     app = Fastify();
@@ -61,6 +63,7 @@ describe('Inventory Fastify Routes', () => {
       createInventoryRoutes({
         getEventSeatsUseCase,
         holdSpecificSeatsUseCase,
+        autoHoldSeatsUseCase,
         releaseHoldUseCase,
         tokenService: identityTokenService,
         admissionTokenService,
@@ -220,5 +223,61 @@ describe('Inventory Fastify Routes', () => {
     expect(releaseRes.statusCode).toBe(200);
     const body = JSON.parse(releaseRes.body);
     expect(body.success).toBe(true);
+  });
+
+  it('POST /reservations/auto-holds allocates seats automatically per category', async () => {
+    const userToken = identityTokenService.generateAccessToken({
+      sub: userId,
+      email: 'user@example.com',
+      role: 'user',
+    });
+    const admissionToken = admissionTokenService.generateToken(userId, eventId, 300);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/reservations/auto-holds',
+      headers: {
+        authorization: `Bearer ${userToken}`,
+        'x-admission-token': admissionToken,
+      },
+      payload: {
+        eventId,
+        categoryId: 'cat-1',
+        quantity: 1,
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    const body = JSON.parse(res.body);
+    expect(body.holds).toHaveLength(1);
+    expect(body.holds[0]?.status).toBe('ACTIVE');
+  });
+
+  it('POST /reservations/auto-holds returns 409 Conflict when insufficient seats in category', async () => {
+    const userToken = identityTokenService.generateAccessToken({
+      sub: userId,
+      email: 'user@example.com',
+      role: 'user',
+    });
+    const admissionToken = admissionTokenService.generateToken(userId, eventId, 300);
+
+    // Only 2 seats in cat-1, requesting 3 exceeds stock
+    const res = await app.inject({
+      method: 'POST',
+      url: '/reservations/auto-holds',
+      headers: {
+        authorization: `Bearer ${userToken}`,
+        'x-admission-token': admissionToken,
+      },
+      payload: {
+        eventId,
+        categoryId: 'cat-1',
+        quantity: 3,
+      },
+    });
+
+    expect(res.statusCode).toBe(409);
+    const body = JSON.parse(res.body);
+    expect(body.code).toBe('CONFLICT');
   });
 });

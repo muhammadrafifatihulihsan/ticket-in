@@ -3,10 +3,12 @@ import type { TokenService } from '../../identity/domain/token-service.port.js';
 import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
 import type { AdmissionTokenServicePort } from '../../waiting-room/domain/admission-token.port.js';
 import { createAdmissionTokenMiddleware } from '../../waiting-room/interface/queue.middleware.js';
+import type { AutoHoldSeatsUseCase } from '../application/auto-hold-seats.use-case.js';
 import type { GetEventSeatsUseCase } from '../application/get-event-seats.use-case.js';
 import type { HoldSpecificSeatsUseCase } from '../application/hold-specific-seats.use-case.js';
 import type { ReleaseHoldUseCase } from '../application/release-hold.use-case.js';
 import {
+  autoHoldSeatsBodySchema,
   getEventSeatsParamsSchema,
   holdSeatsResponseSchema,
   holdSpecificSeatsBodySchema,
@@ -17,6 +19,7 @@ import {
 export interface InventoryRoutesOptions {
   getEventSeatsUseCase: GetEventSeatsUseCase;
   holdSpecificSeatsUseCase: HoldSpecificSeatsUseCase;
+  autoHoldSeatsUseCase: AutoHoldSeatsUseCase;
   releaseHoldUseCase: ReleaseHoldUseCase;
   tokenService?: TokenService;
   admissionTokenService?: AdmissionTokenServicePort;
@@ -26,6 +29,7 @@ export function createInventoryRoutes(options: InventoryRoutesOptions): FastifyP
   const {
     getEventSeatsUseCase,
     holdSpecificSeatsUseCase,
+    autoHoldSeatsUseCase,
     releaseHoldUseCase,
     tokenService,
     admissionTokenService,
@@ -53,6 +57,33 @@ export function createInventoryRoutes(options: InventoryRoutesOptions): FastifyP
         eventId: body.eventId,
         userId: req.user!.id,
         seatIds: body.seatIds,
+        holdTtlSeconds: body.holdTtlSeconds,
+      });
+
+      const response = {
+        holds: result.holds.map((h) => ({
+          id: h.id,
+          seatId: h.seatId,
+          seatNumber: h.seatNumber,
+          userId: h.userId,
+          status: h.status,
+          expiresAt: h.expiresAt.toISOString(),
+          createdAt: h.createdAt.toISOString(),
+        })),
+        expiresAt: result.expiresAt.toISOString(),
+      };
+
+      return reply.status(201).send(holdSeatsResponseSchema.parse(response));
+    });
+
+    // POST /api/v1/reservations/auto-holds (Mode 2: Auto-allocation per category)
+    fastify.post('/reservations/auto-holds', { preHandler: admissionPreHandlers }, async (req, reply) => {
+      const body = autoHoldSeatsBodySchema.parse(req.body);
+      const result = await autoHoldSeatsUseCase.execute({
+        eventId: body.eventId,
+        userId: req.user!.id,
+        categoryId: body.categoryId,
+        quantity: body.quantity,
         holdTtlSeconds: body.holdTtlSeconds,
       });
 

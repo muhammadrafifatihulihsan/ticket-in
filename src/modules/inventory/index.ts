@@ -2,6 +2,7 @@ export * from './domain/seat.entity.js';
 export * from './domain/inventory.repository.port.js';
 export * from './application/get-event-seats.use-case.js';
 export * from './application/hold-specific-seats.use-case.js';
+export * from './application/auto-hold-seats.use-case.js';
 export * from './application/release-hold.use-case.js';
 export * from './application/cleanup-expired-holds.use-case.js';
 export * from './infrastructure/drizzle-inventory.repository.js';
