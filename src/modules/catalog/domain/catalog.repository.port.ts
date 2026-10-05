@@ -3,11 +3,11 @@ import type { EventDetail, EventStatus, EventSummary } from './event.entity.js';
 export interface NewEventInput {
   slug: string;
   title: string;
-  description?: string | null;
+  description?: string | null | undefined;
   venue: string;
   saleStartsAt: Date;
   saleEndsAt: Date;
-  status?: EventStatus;
+  status?: EventStatus | undefined;
 }
 
 export interface NewSeatCategoryInput {
