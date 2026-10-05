@@ -64,6 +64,10 @@ export class InMemoryOrderRepository implements OrderRepositoryPort {
     this.seats.set(seat.id, { ...seat });
   }
 
+  setOrder(order: OrderWithItems): void {
+    this.orders.set(order.id, { ...order, items: [...order.items] });
+  }
+
   getHold(id: string): InMemoryHoldRecord | undefined {
     return this.holds.get(id);
   }
