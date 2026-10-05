@@ -12,7 +12,7 @@ export interface HoldSpecificSeatsCommand {
   eventId: string;
   userId: string;
   seatIds: string[];
-  holdTtlSeconds?: number;
+  holdTtlSeconds?: number | undefined;
 }
 
 export class HoldSpecificSeatsUseCase {
