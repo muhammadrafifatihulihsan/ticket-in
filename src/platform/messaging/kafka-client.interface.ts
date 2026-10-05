@@ -28,10 +28,7 @@ export type EventHandler<T = Record<string, unknown>> = (
 ) => Promise<void>;
 
 export interface MessageConsumerPort {
-  subscribe<T = Record<string, unknown>>(
-    topic: string,
-    handler: EventHandler<T>,
-  ): Promise<void>;
+  subscribe<T = Record<string, unknown>>(topic: string, handler: EventHandler<T>): Promise<void>;
   start(): Promise<void>;
   stop(): Promise<void>;
 }

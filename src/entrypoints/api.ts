@@ -1,10 +1,13 @@
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import fastifyStatic from '@fastify/static';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { Redis } from 'ioredis';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { CreateEventUseCase } from '../modules/catalog/application/create-event.use-case.js';
 import { GetEventDetailsUseCase } from '../modules/catalog/application/get-event-details.use-case.js';
 import { GetEventsUseCase } from '../modules/catalog/application/get-events.use-case.js';
@@ -78,10 +81,7 @@ import { closeDatabase, db as defaultDb } from '../platform/db/client.js';
 import type * as schema from '../platform/db/schema.js';
 import { registerProblemDetailsErrorHandler } from '../platform/errors/problem-details.js';
 import { UuidV7Generator } from '../platform/id/id-generator.js';
-import {
-  defaultMetricsService,
-  type MetricsService,
-} from '../platform/metrics/metrics.service.js';
+import { defaultMetricsService, type MetricsService } from '../platform/metrics/metrics.service.js';
 import { getRedisClient } from '../platform/redis/client.js';
 
 export interface ApiServerOptions {
@@ -148,6 +148,18 @@ export async function createApiServer(options: ApiServerOptions = {}): Promise<F
     },
   });
 
+  // 4b. Static Web Demo (served at /app)
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const publicDir = path.resolve(__dirname, '..', '..', 'public');
+  await app.register(fastifyStatic, {
+    root: publicDir,
+    prefix: '/app/',
+  });
+
+  app.get('/app', async (_req, reply) => {
+    return reply.sendFile('index.html');
+  });
+
   // 5. System Health & Observability Endpoints
   app.get('/health', async (_req, reply) => {
     return reply.status(200).send({
@@ -169,8 +181,7 @@ export async function createApiServer(options: ApiServerOptions = {}): Promise<F
     new JwtTokenService(cfg.JWT_ACCESS_SECRET, cfg.JWT_REFRESH_SECRET, '15m', '7d');
 
   const admissionTokenService =
-    options.admissionTokenService ??
-    new JwtAdmissionTokenService(cfg.WAITING_ROOM_SECRET);
+    options.admissionTokenService ?? new JwtAdmissionTokenService(cfg.WAITING_ROOM_SECRET);
 
   // 7. Route Wiring
   // Identity / Auth

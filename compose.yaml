@@ -7,17 +7,17 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: ticket-in-postgres
-    profiles: ["core", "observability", "chaos", "loadtest"]
+    profiles: ['core', 'observability', 'chaos', 'loadtest']
     environment:
       POSTGRES_USER: ticketin
       POSTGRES_PASSWORD: ticketin_dev_password
       POSTGRES_DB: ticketin_db
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ticketin -d ticketin_db"]
+      test: ['CMD-SHELL', 'pg_isready -U ticketin -d ticketin_db']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -26,14 +26,14 @@ services:
   redis:
     image: redis:7-alpine
     container_name: ticket-in-redis
-    profiles: ["core", "observability", "chaos", "loadtest"]
-    command: ["redis-server", "--appendonly", "yes", "--requirepass", "redis_dev_password"]
+    profiles: ['core', 'observability', 'chaos', 'loadtest']
+    command: ['redis-server', '--appendonly', 'yes', '--requirepass', 'redis_dev_password']
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "redis_dev_password", "ping"]
+      test: ['CMD', 'redis-cli', '-a', 'redis_dev_password', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -42,7 +42,7 @@ services:
   kafka:
     image: apache/kafka:3.8.0
     container_name: ticket-in-kafka
-    profiles: ["core", "observability", "chaos", "loadtest"]
+    profiles: ['core', 'observability', 'chaos', 'loadtest']
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -55,13 +55,17 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
     ports:
-      - "9092:9092"
+      - '9092:9092'
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      test:
+        [
+          'CMD-SHELL',
+          '/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -73,12 +77,12 @@ services:
   toxiproxy:
     image: ghcr.io/shopify/toxiproxy:2.9.0
     container_name: ticket-in-toxiproxy
-    profiles: ["chaos"]
+    profiles: ['chaos']
     ports:
-      - "8474:8474"
-      - "25432:25432"
-      - "26379:26379"
-      - "29092:29092"
+      - '8474:8474'
+      - '25432:25432'
+      - '26379:26379'
+      - '29092:29092'
     restart: unless-stopped
 
   # ============================================================================
@@ -87,18 +91,18 @@ services:
   prometheus:
     image: prom/prometheus:v2.53.0
     container_name: ticket-in-prometheus
-    profiles: ["observability"]
+    profiles: ['observability']
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:11.1.0
     container_name: ticket-in-grafana
-    profiles: ["observability"]
+    profiles: ['observability']
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=grafana_admin
@@ -107,7 +111,7 @@ services:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
     ports:
-      - "3002:3000"
+      - '3002:3000'
     depends_on:
       - prometheus
     restart: unless-stopped

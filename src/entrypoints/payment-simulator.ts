@@ -18,7 +18,8 @@ export type SimulatePaymentBody = z.infer<typeof simulatePaymentBodySchema>;
 
 export interface PaymentSimulatorOptions {
   config?: EnvConfig | undefined;
-  dispatcher?: ((url: string, headers: Record<string, string>, body: unknown) => Promise<void>) | undefined;
+  dispatcher?:
+    ((url: string, headers: Record<string, string>, body: unknown) => Promise<void>) | undefined;
 }
 
 export function createPaymentSimulatorApp(options: PaymentSimulatorOptions = {}): FastifyInstance {
@@ -26,7 +27,11 @@ export function createPaymentSimulatorApp(options: PaymentSimulatorOptions = {})
   const clock = new SystemClock();
   const hmacService = new HmacSignatureService(cfg.WEBHOOK_HMAC_SECRET, clock);
 
-  const defaultDispatcher = async (url: string, headers: Record<string, string>, body: unknown): Promise<void> => {
+  const defaultDispatcher = async (
+    url: string,
+    headers: Record<string, string>,
+    body: unknown,
+  ): Promise<void> => {
     try {
       await fetch(url, {
         method: 'POST',
@@ -69,7 +74,8 @@ export function createPaymentSimulatorApp(options: PaymentSimulatorOptions = {})
     }
 
     const callbackUrl =
-      body.callbackUrl ?? `${cfg.HOST === '0.0.0.0' ? 'http://localhost' : 'http://' + cfg.HOST}:${cfg.PORT}/api/v1/payments/webhook`;
+      body.callbackUrl ??
+      `${cfg.HOST === '0.0.0.0' ? 'http://localhost' : 'http://' + cfg.HOST}:${cfg.PORT}/api/v1/payments/webhook`;
 
     const delayMs = body.delayMs ?? cfg.PAYMENT_SIMULATOR_LATENCY_MS;
     const timestamp = Math.floor(clock.now().getTime() / 1000);
@@ -114,7 +120,10 @@ export function createPaymentSimulatorApp(options: PaymentSimulatorOptions = {})
 }
 
 // Self-starting entrypoint when executed directly
-if (process.argv[1]?.endsWith('payment-simulator.ts') || process.argv[1]?.endsWith('payment-simulator.js')) {
+if (
+  process.argv[1]?.endsWith('payment-simulator.ts') ||
+  process.argv[1]?.endsWith('payment-simulator.js')
+) {
   const server = createPaymentSimulatorApp();
   const port = defaultConfig.PAYMENT_SIMULATOR_PORT;
   server.listen({ port, host: '0.0.0.0' }, (err, address) => {

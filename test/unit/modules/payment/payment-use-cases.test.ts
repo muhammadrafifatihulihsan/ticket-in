@@ -101,17 +101,17 @@ describe('Payment Module Use Cases', () => {
     });
 
     it('throws ForbiddenError when user does not own the order', async () => {
-      await expect(
-        checkoutUseCase.execute({ orderId, userId: userB }),
-      ).rejects.toThrow(ForbiddenError);
+      await expect(checkoutUseCase.execute({ orderId, userId: userB })).rejects.toThrow(
+        ForbiddenError,
+      );
     });
 
     it('throws ConflictError if order is not PENDING', async () => {
       await orderRepo.updateStatus(orderId, 'CANCELLED');
 
-      await expect(
-        checkoutUseCase.execute({ orderId, userId: userA }),
-      ).rejects.toThrow(ConflictError);
+      await expect(checkoutUseCase.execute({ orderId, userId: userA })).rejects.toThrow(
+        ConflictError,
+      );
     });
   });
 

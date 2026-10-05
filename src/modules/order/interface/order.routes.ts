@@ -65,8 +65,7 @@ export function createOrderRoutes(options: OrderRoutesOptions): FastifyPluginAsy
     // POST /orders (Protected with JWT and required Idempotency-Key)
     fastify.post('/orders', { preHandler: authPreHandlers }, async (req, reply) => {
       const rawHeader = req.headers['idempotency-key'];
-      const idempotencyKey =
-        typeof rawHeader === 'string' ? rawHeader.trim() : undefined;
+      const idempotencyKey = typeof rawHeader === 'string' ? rawHeader.trim() : undefined;
 
       if (!idempotencyKey) {
         throw new ValidationError('Header Idempotency-Key is required.', [

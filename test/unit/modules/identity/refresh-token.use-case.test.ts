@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { UnauthorizedError } from '../../../../src/platform/errors/problem-details.js';
-import type { RefreshTokenRepository, TokenFamilyRecord } from '../../../../src/modules/identity/application/ports/refresh-token.repository.port.js';
+import type {
+  RefreshTokenRepository,
+  TokenFamilyRecord,
+} from '../../../../src/modules/identity/application/ports/refresh-token.repository.port.js';
 import type { UserRepository } from '../../../../src/modules/identity/application/ports/user.repository.port.js';
 import { RefreshTokenUseCase } from '../../../../src/modules/identity/application/refresh-token.use-case.js';
-import type { AccessTokenPayload, RefreshTokenPayload, TokenService } from '../../../../src/modules/identity/domain/token-service.port.js';
+import type {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  TokenService,
+} from '../../../../src/modules/identity/domain/token-service.port.js';
 import { User } from '../../../../src/modules/identity/domain/user.entity.js';
 
 class MockUserRepository implements UserRepository {
@@ -118,9 +125,9 @@ describe('RefreshTokenUseCase', () => {
     const useCase = new RefreshTokenUseCase(tokenRepo, userRepo, tokenService);
 
     // Attacker tries to reuse old token v1
-    await expect(
-      useCase.execute({ refreshToken: 'token_fam-alpha_v1' }),
-    ).rejects.toThrow(UnauthorizedError);
+    await expect(useCase.execute({ refreshToken: 'token_fam-alpha_v1' })).rejects.toThrow(
+      UnauthorizedError,
+    );
 
     // Family is now revoked!
     expect(tokenRepo.family.isRevoked).toBe(true);

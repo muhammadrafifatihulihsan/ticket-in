@@ -3,10 +3,7 @@ import type {
   HoldSeatsResult,
   InventoryRepositoryPort,
 } from '../domain/inventory.repository.port.js';
-import {
-  DEFAULT_HOLD_TTL_SECONDS,
-  MAX_SEATS_PER_USER_PER_EVENT,
-} from '../domain/seat.entity.js';
+import { DEFAULT_HOLD_TTL_SECONDS, MAX_SEATS_PER_USER_PER_EVENT } from '../domain/seat.entity.js';
 
 export interface HoldSpecificSeatsCommand {
   eventId: string;
@@ -24,7 +21,9 @@ export class HoldSpecificSeatsUseCase {
     }
 
     if (command.seatIds.length > MAX_SEATS_PER_USER_PER_EVENT) {
-      throw new ValidationError(`Cannot reserve more than ${MAX_SEATS_PER_USER_PER_EVENT} seats at once.`);
+      throw new ValidationError(
+        `Cannot reserve more than ${MAX_SEATS_PER_USER_PER_EVENT} seats at once.`,
+      );
     }
 
     const uniqueSeatIds = new Set(command.seatIds);
@@ -32,7 +31,10 @@ export class HoldSpecificSeatsUseCase {
       throw new ValidationError('Duplicate seat selections are not allowed.');
     }
 
-    const currentHeld = await this.inventoryRepo.countUserActiveSeats(command.eventId, command.userId);
+    const currentHeld = await this.inventoryRepo.countUserActiveSeats(
+      command.eventId,
+      command.userId,
+    );
     if (currentHeld + command.seatIds.length > MAX_SEATS_PER_USER_PER_EVENT) {
       throw new ValidationError(
         `User exceeds the maximum limit of ${MAX_SEATS_PER_USER_PER_EVENT} seats per event. Currently active: ${currentHeld}.`,

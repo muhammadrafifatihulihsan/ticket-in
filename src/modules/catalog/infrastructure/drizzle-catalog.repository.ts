@@ -38,7 +38,11 @@ export class DrizzleCatalogRepository implements CatalogRepositoryPort {
   }
 
   async findEventById(id: string): Promise<EventDetail | null> {
-    const eventRows = await this.db.select().from(schema.events).where(eq(schema.events.id, id)).limit(1);
+    const eventRows = await this.db
+      .select()
+      .from(schema.events)
+      .where(eq(schema.events.id, id))
+      .limit(1);
     const event = eventRows[0];
     if (!event) return null;
 
@@ -57,7 +61,10 @@ export class DrizzleCatalogRepository implements CatalogRepositoryPort {
     return this.buildEventDetail(event);
   }
 
-  async createEvent(event: NewEventInput, categories: NewSeatCategoryInput[]): Promise<EventDetail> {
+  async createEvent(
+    event: NewEventInput,
+    categories: NewSeatCategoryInput[],
+  ): Promise<EventDetail> {
     const eventId = this.idGen.generate();
     const now = new Date();
 

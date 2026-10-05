@@ -1,7 +1,4 @@
-import {
-  ForbiddenError,
-  NotFoundError,
-} from '../../../platform/errors/problem-details.js';
+import { ForbiddenError, NotFoundError } from '../../../platform/errors/problem-details.js';
 import type { OrderWithItems } from '../domain/order.entity.js';
 import type { OrderRepositoryPort } from '../domain/order.repository.port.js';
 

@@ -18,8 +18,18 @@ const CATEGORY_CONFIGS: CategorySeedConfig[] = [
 ];
 
 const DEFAULT_USERS = [
-  { email: 'admin@ticketin.internal', username: 'admin', password: 'AdminSecret123!', role: 'admin' },
-  { email: 'organizer@ticketin.internal', username: 'organizer', password: 'OrganizerSecret123!', role: 'organizer' },
+  {
+    email: 'admin@ticketin.internal',
+    username: 'admin',
+    password: 'AdminSecret123!',
+    role: 'admin',
+  },
+  {
+    email: 'organizer@ticketin.internal',
+    username: 'organizer',
+    password: 'OrganizerSecret123!',
+    role: 'organizer',
+  },
   { email: 'user1@ticketin.internal', username: 'user1', password: 'UserSecret123!', role: 'user' },
   { email: 'user2@ticketin.internal', username: 'user2', password: 'UserSecret123!', role: 'user' },
 ];
@@ -31,7 +41,9 @@ export async function seedDatabase(isDryRun: boolean = false): Promise<void> {
     console.info('[Seed] Dry-run mode enabled. Summary of data to be seeded:');
     console.info('- 4 Default Users (admin, organizer, user1, user2)');
     console.info('- 1 Concert Event: Sound of Future World Tour Jakarta 2026');
-    console.info('- 3 Seat Categories: VIP (100 @ Rp 1.500.000), CAT 1 (400 @ Rp 800.000), CAT 2 (500 @ Rp 400.000)');
+    console.info(
+      '- 3 Seat Categories: VIP (100 @ Rp 1.500.000), CAT 1 (400 @ Rp 800.000), CAT 2 (500 @ Rp 400.000)',
+    );
     console.info('- 1,000 Numbered Seats (VIP-001..100, CAT1-001..400, CAT2-001..500)');
     console.info('[Seed] Dry run completed successfully.');
     return;
@@ -41,7 +53,11 @@ export async function seedDatabase(isDryRun: boolean = false): Promise<void> {
 
   // 1. Seed Users
   for (const u of DEFAULT_USERS) {
-    const existing = await db.select().from(schema.users).where(eq(schema.users.email, u.email)).limit(1);
+    const existing = await db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.email, u.email))
+      .limit(1);
     if (existing.length === 0) {
       const hash = await hasher.hash(u.password);
       await db.insert(schema.users).values({
@@ -59,7 +75,11 @@ export async function seedDatabase(isDryRun: boolean = false): Promise<void> {
 
   // 2. Check if default event exists
   const slug = 'sound-of-future-jakarta-2026';
-  const existingEvents = await db.select().from(schema.events).where(eq(schema.events.slug, slug)).limit(1);
+  const existingEvents = await db
+    .select()
+    .from(schema.events)
+    .where(eq(schema.events.slug, slug))
+    .limit(1);
   if (existingEvents.length > 0) {
     console.info(`[Seed] Event '${slug}' already exists. Skipping catalog seeding.`);
     return;

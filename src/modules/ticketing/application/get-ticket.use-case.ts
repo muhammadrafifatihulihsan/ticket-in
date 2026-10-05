@@ -1,7 +1,4 @@
-import {
-  ForbiddenError,
-  NotFoundError,
-} from '../../../platform/errors/problem-details.js';
+import { ForbiddenError, NotFoundError } from '../../../platform/errors/problem-details.js';
 import type { TicketWithDetails } from '../domain/ticket.entity.js';
 import type { TicketRepositoryPort } from '../domain/ticket.repository.port.js';
 

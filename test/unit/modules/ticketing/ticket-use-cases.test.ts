@@ -59,18 +59,18 @@ describe('Ticketing Module Application Use Cases', () => {
 
   describe('IssueTicketsUseCase', () => {
     it('throws NotFoundError if order does not exist', async () => {
-      await expect(
-        issueTicketsUseCase.execute({ orderId: 'non-existent-order' }),
-      ).rejects.toThrow(NotFoundError);
+      await expect(issueTicketsUseCase.execute({ orderId: 'non-existent-order' })).rejects.toThrow(
+        NotFoundError,
+      );
     });
 
     it('throws InvalidStateTransitionError if order is not in PAID status', async () => {
       const order = createMockOrder('order-1', userA, 'PENDING', ['seat-1']);
       orderRepository.setOrder(order);
 
-      await expect(
-        issueTicketsUseCase.execute({ orderId: order.id }),
-      ).rejects.toThrow(InvalidStateTransitionError);
+      await expect(issueTicketsUseCase.execute({ orderId: order.id })).rejects.toThrow(
+        InvalidStateTransitionError,
+      );
     });
 
     it('successfully issues digital tickets when order status is PAID', async () => {

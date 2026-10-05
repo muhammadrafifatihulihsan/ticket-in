@@ -70,16 +70,8 @@ describe('Payment Webhook Concurrency Race', () => {
       expiresAt: new Date(Date.now() + 900000),
     });
 
-    const checkoutPaymentUseCase = new CheckoutPaymentUseCase(
-      paymentRepo,
-      orderRepo,
-      idGen,
-      clock,
-    );
-    const processPaymentWebhookUseCase = new ProcessPaymentWebhookUseCase(
-      paymentRepo,
-      hmacService,
-    );
+    const checkoutPaymentUseCase = new CheckoutPaymentUseCase(paymentRepo, orderRepo, idGen, clock);
+    const processPaymentWebhookUseCase = new ProcessPaymentWebhookUseCase(paymentRepo, hmacService);
 
     app = Fastify();
     registerProblemDetailsErrorHandler(app);

@@ -1,10 +1,5 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import {
-  Counter,
-  Histogram,
-  Registry,
-  collectDefaultMetrics,
-} from 'prom-client';
+import { Counter, Histogram, Registry, collectDefaultMetrics } from 'prom-client';
 
 declare module 'fastify' {
   interface FastifyRequest {

@@ -41,7 +41,10 @@ export class CreateEventUseCase {
       const validation = validateSeatCategoryInput(cat);
       if (!validation.valid) {
         throw new ValidationError(validation.reason ?? 'Invalid category', [
-          { name: `categories[${index}]`, reason: validation.reason ?? 'Invalid category configuration' },
+          {
+            name: `categories[${index}]`,
+            reason: validation.reason ?? 'Invalid category configuration',
+          },
         ]);
       }
     }

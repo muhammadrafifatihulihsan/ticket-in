@@ -97,10 +97,7 @@ export class DrizzleIdempotencyRepository implements IdempotencyRepositoryPort {
     await this.db
       .delete(schema.idempotencyKeys)
       .where(
-        and(
-          eq(schema.idempotencyKeys.key, key),
-          eq(schema.idempotencyKeys.status, 'IN_PROGRESS'),
-        ),
+        and(eq(schema.idempotencyKeys.key, key), eq(schema.idempotencyKeys.status, 'IN_PROGRESS')),
       );
   }
 }

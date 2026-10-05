@@ -51,63 +51,75 @@ export function createInventoryRoutes(options: InventoryRoutesOptions): FastifyP
     });
 
     // POST /api/v1/reservations/holds (Mode 1: Hold specific seats)
-    fastify.post('/reservations/holds', { preHandler: admissionPreHandlers }, async (req, reply) => {
-      const body = holdSpecificSeatsBodySchema.parse(req.body);
-      const result = await holdSpecificSeatsUseCase.execute({
-        eventId: body.eventId,
-        userId: req.user!.id,
-        seatIds: body.seatIds,
-        holdTtlSeconds: body.holdTtlSeconds,
-      });
+    fastify.post(
+      '/reservations/holds',
+      { preHandler: admissionPreHandlers },
+      async (req, reply) => {
+        const body = holdSpecificSeatsBodySchema.parse(req.body);
+        const result = await holdSpecificSeatsUseCase.execute({
+          eventId: body.eventId,
+          userId: req.user!.id,
+          seatIds: body.seatIds,
+          holdTtlSeconds: body.holdTtlSeconds,
+        });
 
-      const response = {
-        holds: result.holds.map((h) => ({
-          id: h.id,
-          seatId: h.seatId,
-          seatNumber: h.seatNumber,
-          userId: h.userId,
-          status: h.status,
-          expiresAt: h.expiresAt.toISOString(),
-          createdAt: h.createdAt.toISOString(),
-        })),
-        expiresAt: result.expiresAt.toISOString(),
-      };
+        const response = {
+          holds: result.holds.map((h) => ({
+            id: h.id,
+            seatId: h.seatId,
+            seatNumber: h.seatNumber,
+            userId: h.userId,
+            status: h.status,
+            expiresAt: h.expiresAt.toISOString(),
+            createdAt: h.createdAt.toISOString(),
+          })),
+          expiresAt: result.expiresAt.toISOString(),
+        };
 
-      return reply.status(201).send(holdSeatsResponseSchema.parse(response));
-    });
+        return reply.status(201).send(holdSeatsResponseSchema.parse(response));
+      },
+    );
 
     // POST /api/v1/reservations/auto-holds (Mode 2: Auto-allocation per category)
-    fastify.post('/reservations/auto-holds', { preHandler: admissionPreHandlers }, async (req, reply) => {
-      const body = autoHoldSeatsBodySchema.parse(req.body);
-      const result = await autoHoldSeatsUseCase.execute({
-        eventId: body.eventId,
-        userId: req.user!.id,
-        categoryId: body.categoryId,
-        quantity: body.quantity,
-        holdTtlSeconds: body.holdTtlSeconds,
-      });
+    fastify.post(
+      '/reservations/auto-holds',
+      { preHandler: admissionPreHandlers },
+      async (req, reply) => {
+        const body = autoHoldSeatsBodySchema.parse(req.body);
+        const result = await autoHoldSeatsUseCase.execute({
+          eventId: body.eventId,
+          userId: req.user!.id,
+          categoryId: body.categoryId,
+          quantity: body.quantity,
+          holdTtlSeconds: body.holdTtlSeconds,
+        });
 
-      const response = {
-        holds: result.holds.map((h) => ({
-          id: h.id,
-          seatId: h.seatId,
-          seatNumber: h.seatNumber,
-          userId: h.userId,
-          status: h.status,
-          expiresAt: h.expiresAt.toISOString(),
-          createdAt: h.createdAt.toISOString(),
-        })),
-        expiresAt: result.expiresAt.toISOString(),
-      };
+        const response = {
+          holds: result.holds.map((h) => ({
+            id: h.id,
+            seatId: h.seatId,
+            seatNumber: h.seatNumber,
+            userId: h.userId,
+            status: h.status,
+            expiresAt: h.expiresAt.toISOString(),
+            createdAt: h.createdAt.toISOString(),
+          })),
+          expiresAt: result.expiresAt.toISOString(),
+        };
 
-      return reply.status(201).send(holdSeatsResponseSchema.parse(response));
-    });
+        return reply.status(201).send(holdSeatsResponseSchema.parse(response));
+      },
+    );
 
     // DELETE /api/v1/reservations/holds/:id (Voluntary hold release)
-    fastify.delete('/reservations/holds/:id', { preHandler: authPreHandlers }, async (req, reply) => {
-      const params = releaseHoldParamsSchema.parse(req.params);
-      const result = await releaseHoldUseCase.execute(params.id, req.user!.id);
-      return reply.status(200).send(result);
-    });
+    fastify.delete(
+      '/reservations/holds/:id',
+      { preHandler: authPreHandlers },
+      async (req, reply) => {
+        const params = releaseHoldParamsSchema.parse(req.params);
+        const result = await releaseHoldUseCase.execute(params.id, req.user!.id);
+        return reply.status(200).send(result);
+      },
+    );
   };
 }

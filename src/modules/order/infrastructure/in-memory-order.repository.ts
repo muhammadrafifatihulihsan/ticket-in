@@ -9,10 +9,7 @@ import {
   type OrderStatus,
   type OrderWithItems,
 } from '../domain/order.entity.js';
-import type {
-  CreateOrderParams,
-  OrderRepositoryPort,
-} from '../domain/order.repository.port.js';
+import type { CreateOrderParams, OrderRepositoryPort } from '../domain/order.repository.port.js';
 
 export interface InMemoryHoldRecord {
   id: string;
@@ -44,10 +41,7 @@ export class InMemoryOrderRepository implements OrderRepositoryPort {
   }> = [];
   public artificialDelayMs = 0;
 
-  constructor(
-    initialHolds: InMemoryHoldRecord[] = [],
-    initialSeats: InMemorySeatRecord[] = [],
-  ) {
+  constructor(initialHolds: InMemoryHoldRecord[] = [], initialSeats: InMemorySeatRecord[] = []) {
     for (const hold of initialHolds) {
       this.holds.set(hold.id, { ...hold });
     }
@@ -81,7 +75,7 @@ export class InMemoryOrderRepository implements OrderRepositoryPort {
       await new Promise((r) => setTimeout(r, this.artificialDelayMs));
     }
 
-    const targetHoldId = params.holdId ?? (params.holdIds?.[0]);
+    const targetHoldId = params.holdId ?? params.holdIds?.[0];
     if (!targetHoldId) {
       throw new NotFoundError('Reservation hold not found.');
     }

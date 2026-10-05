@@ -13,10 +13,7 @@ import {
   type OrderStatus,
   type OrderWithItems,
 } from '../domain/order.entity.js';
-import type {
-  CreateOrderParams,
-  OrderRepositoryPort,
-} from '../domain/order.repository.port.js';
+import type { CreateOrderParams, OrderRepositoryPort } from '../domain/order.repository.port.js';
 
 export class DrizzleOrderRepository implements OrderRepositoryPort {
   constructor(private readonly db: NodePgDatabase<typeof schema>) {}
@@ -65,10 +62,7 @@ export class DrizzleOrderRepository implements OrderRepositoryPort {
           categoryName: schema.seatCategories.name,
         })
         .from(schema.seats)
-        .innerJoin(
-          schema.seatCategories,
-          eq(schema.seats.categoryId, schema.seatCategories.id),
-        )
+        .innerJoin(schema.seatCategories, eq(schema.seats.categoryId, schema.seatCategories.id))
         .where(inArray(schema.seats.id, seatIds));
 
       if (seatRows.length < seatIds.length) {
@@ -184,10 +178,7 @@ export class DrizzleOrderRepository implements OrderRepositoryPort {
       })
       .from(schema.orderItems)
       .innerJoin(schema.seats, eq(schema.orderItems.seatId, schema.seats.id))
-      .innerJoin(
-        schema.seatCategories,
-        eq(schema.seats.categoryId, schema.seatCategories.id),
-      )
+      .innerJoin(schema.seatCategories, eq(schema.seats.categoryId, schema.seatCategories.id))
       .where(eq(schema.orderItems.orderId, orderId));
 
     return {
@@ -233,10 +224,7 @@ export class DrizzleOrderRepository implements OrderRepositoryPort {
         })
         .from(schema.orderItems)
         .innerJoin(schema.seats, eq(schema.orderItems.seatId, schema.seats.id))
-        .innerJoin(
-          schema.seatCategories,
-          eq(schema.seats.categoryId, schema.seatCategories.id),
-        )
+        .innerJoin(schema.seatCategories, eq(schema.seats.categoryId, schema.seatCategories.id))
         .where(eq(schema.orderItems.orderId, order.id));
 
       results.push({
@@ -269,12 +257,7 @@ export class DrizzleOrderRepository implements OrderRepositoryPort {
       const expiredOrders = await tx
         .select()
         .from(schema.orders)
-        .where(
-          and(
-            eq(schema.orders.status, 'PENDING'),
-            lte(schema.orders.expiresAt, now),
-          ),
-        );
+        .where(and(eq(schema.orders.status, 'PENDING'), lte(schema.orders.expiresAt, now)));
 
       if (expiredOrders.length === 0) {
         return 0;

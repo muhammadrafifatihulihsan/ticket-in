@@ -43,7 +43,12 @@ describe('API Server Bootstrap Integration (src/entrypoints/api.ts)', () => {
     );
 
     ticketRepo = new InMemoryTicketRepository();
-    tokenService = new JwtTokenService('test-secret-at-least-32-chars-long-12345', 'refresh-secret-32-chars-long-12345', '15m', '7d');
+    tokenService = new JwtTokenService(
+      'test-secret-at-least-32-chars-long-12345',
+      'refresh-secret-32-chars-long-12345',
+      '15m',
+      '7d',
+    );
 
     app = await createApiServer({
       metricsService,

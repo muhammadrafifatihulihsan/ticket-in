@@ -66,7 +66,9 @@ export class IdempotencyConflictError extends DomainError {
   readonly errorCode = 'IDEMPOTENCY_IN_PROGRESS';
   readonly title = 'Idempotency Conflict';
 
-  constructor(message: string = 'A request with the same Idempotency-Key is currently in progress.') {
+  constructor(
+    message: string = 'A request with the same Idempotency-Key is currently in progress.',
+  ) {
     super(message);
   }
 }
@@ -76,7 +78,9 @@ export class IdempotencyPayloadMismatchError extends DomainError {
   readonly errorCode = 'IDEMPOTENCY_PAYLOAD_MISMATCH';
   readonly title = 'Idempotency Payload Mismatch';
 
-  constructor(message: string = 'The Idempotency-Key was already used with a different request payload.') {
+  constructor(
+    message: string = 'The Idempotency-Key was already used with a different request payload.',
+  ) {
     super(message);
   }
 }
@@ -119,7 +123,10 @@ export function toProblemDetails(error: unknown, instance?: string): ProblemDeta
 export function registerProblemDetailsErrorHandler(fastify: FastifyInstance): void {
   fastify.setErrorHandler(
     (
-      error: Error & { statusCode?: number; issues?: Array<{ path: (string | number)[]; message: string }> },
+      error: Error & {
+        statusCode?: number;
+        issues?: Array<{ path: (string | number)[]; message: string }>;
+      },
       request,
       reply,
     ) => {
@@ -168,4 +175,3 @@ export function registerProblemDetailsErrorHandler(fastify: FastifyInstance): vo
     },
   );
 }
-

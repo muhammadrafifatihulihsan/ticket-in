@@ -42,7 +42,10 @@ describe('Auth Fastify Routes', () => {
     const userRepo = new MockUserRepo();
     const tokenRepo = new InMemoryRefreshTokenRepository();
     const hasher = new FastHasher();
-    const tokenService = new JwtTokenService('secret12345678901234567890123456', 'secret12345678901234567890123456');
+    const tokenService = new JwtTokenService(
+      'secret12345678901234567890123456',
+      'secret12345678901234567890123456',
+    );
     const validUuid = '0192634e-0000-7000-8000-000000000001';
     const idGen = new DeterministicIdGenerator([validUuid, 'fam-1']);
     const clock = new FrozenClock();

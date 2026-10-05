@@ -142,7 +142,10 @@ export class DrizzleInventoryRepository implements InventoryRepositoryPort {
         FOR UPDATE SKIP LOCKED
       `);
 
-      const candidateSeats = candidateResult.rows as unknown as Array<{ id: string; seatNumber: string }>;
+      const candidateSeats = candidateResult.rows as unknown as Array<{
+        id: string;
+        seatNumber: string;
+      }>;
 
       if (candidateSeats.length < params.quantity) {
         throw new ConflictError('Insufficient seats available in the selected category.');
@@ -233,12 +236,7 @@ export class DrizzleInventoryRepository implements InventoryRepositoryPort {
       const expiredHolds = await tx
         .select()
         .from(schema.seatHolds)
-        .where(
-          and(
-            eq(schema.seatHolds.status, 'ACTIVE'),
-            lte(schema.seatHolds.expiresAt, now),
-          ),
-        );
+        .where(and(eq(schema.seatHolds.status, 'ACTIVE'), lte(schema.seatHolds.expiresAt, now)));
 
       if (expiredHolds.length === 0) return 0;
 

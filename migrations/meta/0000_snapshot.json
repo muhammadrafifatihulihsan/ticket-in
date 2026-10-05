@@ -64,12 +64,8 @@
           "name": "audit_logs_user_id_users_id_fk",
           "tableFrom": "audit_logs",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -155,9 +151,7 @@
         "events_slug_unique": {
           "name": "events_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -231,12 +225,8 @@
           "name": "idempotency_keys_user_id_users_id_fk",
           "tableFrom": "idempotency_keys",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -276,10 +266,7 @@
       "compositePrimaryKeys": {
         "inbox_events_event_id_consumer_group_pk": {
           "name": "inbox_events_event_id_consumer_group_pk",
-          "columns": [
-            "event_id",
-            "consumer_group"
-          ]
+          "columns": ["event_id", "consumer_group"]
         }
       },
       "uniqueConstraints": {},
@@ -329,12 +316,8 @@
           "name": "order_items_order_id_orders_id_fk",
           "tableFrom": "order_items",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -342,12 +325,8 @@
           "name": "order_items_seat_id_seats_id_fk",
           "tableFrom": "order_items",
           "tableTo": "seats",
-          "columnsFrom": [
-            "seat_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["seat_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -420,12 +399,8 @@
           "name": "orders_user_id_users_id_fk",
           "tableFrom": "orders",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -433,12 +408,8 @@
           "name": "orders_event_id_events_id_fk",
           "tableFrom": "orders",
           "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -575,12 +546,8 @@
           "name": "payments_order_id_orders_id_fk",
           "tableFrom": "payments",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -639,12 +606,8 @@
           "name": "seat_categories_event_id_events_id_fk",
           "tableFrom": "seat_categories",
           "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -721,12 +684,8 @@
           "name": "seat_holds_seat_id_seats_id_fk",
           "tableFrom": "seat_holds",
           "tableTo": "seats",
-          "columnsFrom": [
-            "seat_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["seat_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -734,12 +693,8 @@
           "name": "seat_holds_user_id_users_id_fk",
           "tableFrom": "seat_holds",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -840,12 +795,8 @@
           "name": "seats_event_id_events_id_fk",
           "tableFrom": "seats",
           "tableTo": "events",
-          "columnsFrom": [
-            "event_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["event_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -853,12 +804,8 @@
           "name": "seats_category_id_seat_categories_id_fk",
           "tableFrom": "seats",
           "tableTo": "seat_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -866,12 +813,8 @@
           "name": "seats_held_by_users_id_fk",
           "tableFrom": "seats",
           "tableTo": "users",
-          "columnsFrom": [
-            "held_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["held_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -937,12 +880,8 @@
           "name": "tickets_order_id_orders_id_fk",
           "tableFrom": "tickets",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -950,12 +889,8 @@
           "name": "tickets_seat_id_seats_id_fk",
           "tableFrom": "tickets",
           "tableTo": "seats",
-          "columnsFrom": [
-            "seat_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["seat_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -963,12 +898,8 @@
           "name": "tickets_user_id_users_id_fk",
           "tableFrom": "tickets",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -978,9 +909,7 @@
         "tickets_ticket_code_unique": {
           "name": "tickets_ticket_code_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "ticket_code"
-          ]
+          "columns": ["ticket_code"]
         }
       },
       "policies": {},
@@ -1044,16 +973,12 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},

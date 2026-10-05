@@ -26,10 +26,7 @@ const ALLOWED_PAYMENT_TRANSITIONS: Record<PaymentStatus, readonly PaymentStatus[
  * Validates if a payment status transition is permitted.
  * Throws InvalidStateTransitionError if transition is illegal.
  */
-export function assertValidPaymentTransition(
-  from: PaymentStatus,
-  to: PaymentStatus,
-): void {
+export function assertValidPaymentTransition(from: PaymentStatus, to: PaymentStatus): void {
   const allowed = ALLOWED_PAYMENT_TRANSITIONS[from];
   if (!allowed.includes(to)) {
     throw new InvalidStateTransitionError(

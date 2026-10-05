@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ticket-in – Concert Ticket War Platform</title>
+    <meta
+      name="description"
+      content="ticket-in is a high-concurrency concert ticket platform with virtual waiting rooms, numbered seat selection, and real-time payment processing."
+    />
+    <link rel="stylesheet" href="/app/app.css" />
+  </head>
+  <body>
+    <div class="app-wrapper">
+      <!-- ================================================================ -->
+      <!-- Header -->
+      <!-- ================================================================ -->
+      <header class="app-header">
+        <div class="logo">
+          <div class="logo-icon">🎫</div>
+          <span class="logo-text">ticket-in</span>
+          <span class="logo-badge">v1.0 Demo</span>
+        </div>
+        <div class="header-status">
+          <div id="health-dot" class="status-dot offline"></div>
+          <span id="health-label">Checking API...</span>
+          <span
+            id="header-user"
+            class="hidden"
+            style="margin-left: 12px; font-weight: 600; color: var(--accent-purple)"
+          ></span>
+        </div>
+      </header>
+
+      <!-- ================================================================ -->
+      <!-- Step Navigation -->
+      <!-- ================================================================ -->
+      <nav class="step-nav" aria-label="Steps">
+        <button class="step-btn active" id="step-nav-0">
+          <span class="step-num">1</span>Sign In
+        </button>
+        <button class="step-btn" id="step-nav-1"><span class="step-num">2</span>Queue</button>
+        <button class="step-btn" id="step-nav-2"><span class="step-num">3</span>Seats</button>
+        <button class="step-btn" id="step-nav-3"><span class="step-num">4</span>Order</button>
+        <button class="step-btn" id="step-nav-4"><span class="step-num">5</span>Payment</button>
+        <button class="step-btn" id="step-nav-5"><span class="step-num">6</span>Tickets</button>
+      </nav>
+
+      <!-- ================================================================ -->
+      <!-- Step 0: Authentication -->
+      <!-- ================================================================ -->
+      <section class="step-panel" id="panel-0">
+        <div class="card" style="max-width: 480px; margin: 0 auto">
+          <div class="card-title">
+            <div class="icon" style="background: linear-gradient(135deg, #8b5cf6, #6366f1)">🔐</div>
+            Authentication
+          </div>
+          <div class="card-subtitle">Sign in or create an account to join the ticket war.</div>
+
+          <div class="tab-group">
+            <button class="tab-btn active" id="tab-login">Sign In</button>
+            <button class="tab-btn" id="tab-register">Register</button>
+          </div>
+
+          <form id="auth-form" novalidate>
+            <div id="register-fields" class="hidden">
+              <div class="form-group">
+                <label class="form-label" for="input-username">Username</label>
+                <input
+                  class="form-input"
+                  id="input-username"
+                  type="text"
+                  placeholder="e.g. concertfan2026"
+                  autocomplete="username"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-email">Email</label>
+              <input
+                class="form-input"
+                id="input-email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-password">Password</label>
+              <input
+                class="form-input"
+                id="input-password"
+                type="password"
+                placeholder="Min. 8 characters"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+            <button class="btn btn-primary btn-full" id="auth-submit-btn" type="submit">
+              Sign In
+            </button>
+          </form>
+
+          <div class="info-panel mt-16">
+            <span>ℹ️</span>
+            <span
+              >This is a live demo connected to the ticket-in API server. All data is real and
+              persisted.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- Step 1: Waiting Room Queue -->
+      <!-- ================================================================ -->
+      <section class="step-panel hidden" id="panel-1">
+        <div class="card">
+          <div class="card-title">
+            <div class="icon" style="background: linear-gradient(135deg, #22d3ee, #0891b2)">⏳</div>
+            Virtual Waiting Room
+          </div>
+          <div class="card-subtitle">
+            Join the queue for the concert. Admission tokens are issued in batches.
+          </div>
+
+          <div id="queue-polling" class="hidden">
+            <div class="queue-radar">
+              <div
+                style="
+                  position: relative;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <div class="radar-ring"></div>
+                <div class="radar-ring"></div>
+                <div class="radar-ring"></div>
+                <div class="radar-center"></div>
+              </div>
+            </div>
+
+            <div class="queue-display">
+              <div class="queue-stat">
+                <div class="queue-stat-value" id="queue-rank-value">--</div>
+                <div class="queue-stat-label">Your Position</div>
+              </div>
+              <div class="queue-stat">
+                <div class="queue-stat-value" id="queue-status-value">WAITING</div>
+                <div class="queue-stat-label">Status</div>
+              </div>
+            </div>
+            <p class="text-muted text-center">Polling every 3 seconds for updates...</p>
+          </div>
+
+          <div id="queue-admitted-section" class="hidden">
+            <div
+              class="info-panel"
+              style="background: rgba(16, 185, 129, 0.06); border-color: rgba(16, 185, 129, 0.25)"
+            >
+              <span>✅</span>
+              <span
+                >You have been <strong>admitted</strong>! Your cryptographic admission token is
+                ready.</span
+              >
+            </div>
+            <div class="token-card">
+              <div class="token-icon">🎟️</div>
+              <div class="token-text">
+                <div class="token-label">Admission Token (JWT)</div>
+                <div class="token-value" id="admission-token-value">--</div>
+              </div>
+            </div>
+            <div class="mt-16">
+              <button class="btn btn-primary btn-full" id="btn-to-seats">
+                Continue to Seat Selection →
+              </button>
+            </div>
+          </div>
+
+          <div id="queue-join-section">
+            <button class="btn btn-primary btn-full" id="btn-join-queue">Join Queue</button>
+            <div class="mt-8 text-center">
+              <button class="btn btn-secondary btn-sm" id="btn-skip-queue">
+                Skip queue (demo)
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- Step 2: Seat Map -->
+      <!-- ================================================================ -->
+      <section class="step-panel hidden" id="panel-2">
+        <div class="card">
+          <div class="card-title">
+            <div class="icon" style="background: linear-gradient(135deg, #10b981, #059669)">🪑</div>
+            Interactive Seat Map
+          </div>
+          <div class="card-subtitle">
+            Select up to 4 seats. Green = Available, Yellow = Held, Gray = Sold.
+          </div>
+
+          <div class="seat-map-wrapper">
+            <div class="stage">◀ Stage ▶</div>
+
+            <div class="seat-category">
+              <div class="seat-category-label">
+                <span class="category-badge badge-vip">VIP</span>
+                VIP Section – Rp 1.500.000 /seat
+              </div>
+              <div class="seats-grid" id="vip-seats"></div>
+            </div>
+
+            <div class="seat-category">
+              <div class="seat-category-label">
+                <span class="category-badge badge-cat1">CAT 1</span>
+                Category 1 – Rp 800.000 /seat
+              </div>
+              <div class="seats-grid" id="cat1-seats"></div>
+            </div>
+
+            <div class="seat-category">
+              <div class="seat-category-label">
+                <span class="category-badge badge-cat2">CAT 2</span>
+                Category 2 – Rp 400.000 /seat
+              </div>
+              <div class="seats-grid" id="cat2-seats"></div>
+            </div>
+
+            <div class="seat-legend">
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="
+                    background: rgba(16, 185, 129, 0.3);
+                    border: 1.5px solid var(--accent-green);
+                  "
+                ></div>
+                Available
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="
+                    background: rgba(139, 92, 246, 0.3);
+                    border: 1.5px solid var(--accent-purple);
+                  "
+                ></div>
+                Selected
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="
+                    background: rgba(245, 158, 11, 0.3);
+                    border: 1.5px solid var(--accent-amber);
+                  "
+                ></div>
+                Held by others
+              </div>
+              <div class="legend-item">
+                <div
+                  class="legend-dot"
+                  style="
+                    background: rgba(71, 85, 105, 0.3);
+                    border: 1.5px solid var(--text-muted);
+                    opacity: 0.5;
+                  "
+                ></div>
+                Sold
+              </div>
+            </div>
+          </div>
+
+          <div class="selection-info" id="seat-selection-info">
+            <div>Selected: <strong id="selected-seat-list">-</strong></div>
+            <div class="mt-8">Total: <strong id="selected-seat-total">Rp 0</strong></div>
+          </div>
+
+          <div class="mt-16">
+            <button class="btn btn-primary btn-full" id="btn-hold-seats" disabled>
+              Hold Selected Seats →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- Step 3: Order Confirmation & Hold Timer -->
+      <!-- ================================================================ -->
+      <section class="step-panel hidden" id="panel-3">
+        <div class="card">
+          <div class="card-title">
+            <div class="icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)">📋</div>
+            Order Confirmation
+          </div>
+          <div class="card-subtitle">
+            Review your order. You have 10 minutes to complete payment.
+          </div>
+
+          <div class="hold-timer">
+            <div>
+              <div class="timer-label">Hold Expires In</div>
+            </div>
+            <div class="timer-display" id="hold-timer-display">10:00</div>
+            <div class="timer-info">
+              <div class="timer-desc">Complete payment before time runs out.</div>
+            </div>
+          </div>
+
+          <div class="order-summary">
+            <div id="order-items-body"></div>
+            <div class="order-row" style="margin-top: 8px">
+              <span class="order-label" style="font-weight: 700">Total</span>
+              <span class="order-value total" id="order-total-display">Rp 0</span>
+            </div>
+          </div>
+
+          <div class="info-panel">
+            <span>🔑</span>
+            <span
+              >This order will be submitted with a unique <strong>Idempotency-Key</strong> to
+              prevent duplicate charges.</span
+            >
+          </div>
+
+          <button class="btn btn-primary btn-full" id="btn-create-order">Create Order →</button>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- Step 4: Payment Simulation -->
+      <!-- ================================================================ -->
+      <section class="step-panel hidden" id="panel-4">
+        <div class="card">
+          <div class="card-title">
+            <div class="icon" style="background: linear-gradient(135deg, #f43f5e, #e11d48)">💳</div>
+            Payment Gateway
+          </div>
+          <div class="card-subtitle">Complete your payment via the simulated payment gateway.</div>
+
+          <div id="payment-pending">
+            <div class="order-summary mb-0">
+              <div class="order-row">
+                <span class="order-label">Order ID</span>
+                <span class="order-id" id="payment-order-id">--</span>
+              </div>
+              <div class="order-row">
+                <span class="order-label">Amount Due</span>
+                <span class="order-value total" id="payment-amount-display">Rp 0</span>
+              </div>
+            </div>
+
+            <div class="info-panel warning mt-16">
+              <span>⚡</span>
+              <span
+                >Clicking pay triggers the HMAC-signed webhook pipeline. Tickets are issued
+                asynchronously via the Transactional Outbox pattern.</span
+              >
+            </div>
+
+            <button class="btn btn-success btn-full mt-16" id="btn-simulate-payment">
+              💳 Pay Now (Simulate)
+            </button>
+          </div>
+
+          <div id="payment-success" class="hidden">
+            <div class="payment-status">
+              <div class="payment-icon">🎉</div>
+              <h3 style="color: var(--accent-green)">Payment Successful!</h3>
+              <p>Your tickets are being issued via the Outbox pipeline...</p>
+              <div class="mt-16">
+                <div
+                  class="btn btn-loading"
+                  style="
+                    display: inline-flex;
+                    gap: 8px;
+                    color: var(--text-secondary);
+                    font-size: 13px;
+                    background: none;
+                    border: none;
+                    cursor: default;
+                  "
+                >
+                  Processing tickets
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full mt-16 hidden" id="btn-go-to-tickets">
+              View My Tickets →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- Step 5: Digital Tickets -->
+      <!-- ================================================================ -->
+      <section class="step-panel hidden" id="panel-5">
+        <div class="card">
+          <div class="card-title">
+            <div class="icon" style="background: linear-gradient(135deg, #10b981, #8b5cf6)">🎟️</div>
+            Your Digital Tickets
+          </div>
+          <div class="card-subtitle">
+            Present these at the gate for check-in. Each ticket can only be scanned once.
+          </div>
+
+          <div id="tickets-container">
+            <div class="text-muted text-center" style="padding: 32px">Loading tickets...</div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- /app-wrapper -->
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/app/app.js" type="module"></script>
+  </body>
+</html>

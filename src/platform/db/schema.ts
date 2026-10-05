@@ -52,7 +52,9 @@ export type NewEvent = typeof events.$inferInsert;
 // =============================================================================
 export const seatCategories = pgTable('seat_categories', {
   id: uuid('id').primaryKey(),
-  eventId: uuid('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  eventId: uuid('event_id')
+    .notNull()
+    .references(() => events.id, { onDelete: 'cascade' }),
   name: varchar('name', { length: 50 }).notNull(),
   price: bigint('price', { mode: 'number' }).notNull(),
   totalSeats: integer('total_seats').notNull(),
@@ -63,8 +65,12 @@ export const seats = pgTable(
   'seats',
   {
     id: uuid('id').primaryKey(),
-    eventId: uuid('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
-    categoryId: uuid('category_id').notNull().references(() => seatCategories.id, { onDelete: 'cascade' }),
+    eventId: uuid('event_id')
+      .notNull()
+      .references(() => events.id, { onDelete: 'cascade' }),
+    categoryId: uuid('category_id')
+      .notNull()
+      .references(() => seatCategories.id, { onDelete: 'cascade' }),
     seatNumber: varchar('seat_number', { length: 30 }).notNull(),
     status: varchar('status', { length: 30 }).notNull().default('AVAILABLE'),
     heldBy: uuid('held_by').references(() => users.id, { onDelete: 'set null' }),
@@ -72,17 +78,19 @@ export const seats = pgTable(
     version: integer('version').notNull().default(0),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    uniqueIndex('idx_seats_event_seat_number').on(table.eventId, table.seatNumber),
-  ],
+  (table) => [uniqueIndex('idx_seats_event_seat_number').on(table.eventId, table.seatNumber)],
 );
 
 export const seatHolds = pgTable(
   'seat_holds',
   {
     id: uuid('id').primaryKey(),
-    seatId: uuid('seat_id').notNull().references(() => seats.id, { onDelete: 'cascade' }),
-    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    seatId: uuid('seat_id')
+      .notNull()
+      .references(() => seats.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
     status: varchar('status', { length: 30 }).notNull().default('ACTIVE'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -103,8 +111,12 @@ export type SeatHold = typeof seatHolds.$inferSelect;
 // =============================================================================
 export const orders = pgTable('orders', {
   id: uuid('id').primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  eventId: uuid('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  eventId: uuid('event_id')
+    .notNull()
+    .references(() => events.id, { onDelete: 'cascade' }),
   status: varchar('status', { length: 30 }).notNull().default('PENDING'),
   totalAmount: bigint('total_amount', { mode: 'number' }).notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
@@ -114,8 +126,12 @@ export const orders = pgTable('orders', {
 
 export const orderItems = pgTable('order_items', {
   id: uuid('id').primaryKey(),
-  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
-  seatId: uuid('seat_id').notNull().references(() => seats.id, { onDelete: 'restrict' }),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  seatId: uuid('seat_id')
+    .notNull()
+    .references(() => seats.id, { onDelete: 'restrict' }),
   price: bigint('price', { mode: 'number' }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -128,7 +144,9 @@ export type OrderItem = typeof orderItems.$inferSelect;
 // =============================================================================
 export const payments = pgTable('payments', {
   id: uuid('id').primaryKey(),
-  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
   externalId: varchar('external_id', { length: 100 }),
   provider: varchar('provider', { length: 50 }).notNull().default('simulator'),
   amount: bigint('amount', { mode: 'number' }).notNull(),
@@ -145,9 +163,15 @@ export type NewPayment = typeof payments.$inferInsert;
 // =============================================================================
 export const tickets = pgTable('tickets', {
   id: uuid('id').primaryKey(),
-  orderId: uuid('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
-  seatId: uuid('seat_id').notNull().references(() => seats.id, { onDelete: 'restrict' }),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  orderId: uuid('order_id')
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  seatId: uuid('seat_id')
+    .notNull()
+    .references(() => seats.id, { onDelete: 'restrict' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   ticketCode: varchar('ticket_code', { length: 64 }).notNull().unique(),
   status: varchar('status', { length: 30 }).notNull().default('ISSUED'),
   issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
@@ -177,9 +201,7 @@ export const inboxEvents = pgTable(
     consumerGroup: varchar('consumer_group', { length: 100 }).notNull(),
     processedAt: timestamp('processed_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    primaryKey({ columns: [table.eventId, table.consumerGroup] }),
-  ],
+  (table) => [primaryKey({ columns: [table.eventId, table.consumerGroup] })],
 );
 
 export type OutboxEvent = typeof outboxEvents.$inferSelect;
@@ -190,7 +212,9 @@ export type InboxEvent = typeof inboxEvents.$inferSelect;
 // =============================================================================
 export const idempotencyKeys = pgTable('idempotency_keys', {
   key: varchar('key', { length: 255 }).primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
   requestPath: varchar('request_path', { length: 255 }).notNull(),
   requestHash: varchar('request_hash', { length: 64 }).notNull(),
   status: varchar('status', { length: 30 }).notNull().default('IN_PROGRESS'),

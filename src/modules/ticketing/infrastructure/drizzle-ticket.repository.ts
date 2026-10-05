@@ -10,10 +10,7 @@ import {
   type TicketStatus,
   type TicketWithDetails,
 } from '../domain/ticket.entity.js';
-import type {
-  IssueTicketsParams,
-  TicketRepositoryPort,
-} from '../domain/ticket.repository.port.js';
+import type { IssueTicketsParams, TicketRepositoryPort } from '../domain/ticket.repository.port.js';
 
 export class DrizzleTicketRepository implements TicketRepositoryPort {
   constructor(private readonly db: NodePgDatabase<typeof schema>) {}
@@ -245,10 +242,7 @@ export class DrizzleTicketRepository implements TicketRepositoryPort {
 
     assertValidTicketTransition(existing.status, status);
 
-    await this.db
-      .update(schema.tickets)
-      .set({ status })
-      .where(eq(schema.tickets.id, ticketId));
+    await this.db.update(schema.tickets).set({ status }).where(eq(schema.tickets.id, ticketId));
 
     const updated = await this.findById(ticketId);
     if (!updated) {

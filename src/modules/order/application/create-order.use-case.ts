@@ -1,10 +1,7 @@
 import type { Clock } from '../../../platform/clock/clock.js';
 import { ValidationError } from '../../../platform/errors/problem-details.js';
 import type { IdGenerator } from '../../../platform/id/id-generator.js';
-import {
-  DEFAULT_ORDER_EXPIRATION_SECONDS,
-  type OrderWithItems,
-} from '../domain/order.entity.js';
+import { DEFAULT_ORDER_EXPIRATION_SECONDS, type OrderWithItems } from '../domain/order.entity.js';
 import type { OrderRepositoryPort } from '../domain/order.repository.port.js';
 
 export interface CreateOrderCommand {

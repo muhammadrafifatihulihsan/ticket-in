@@ -1,10 +1,7 @@
 import { asc, eq, inArray } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../db/schema.js';
-import type {
-  OutboxEventRecord,
-  OutboxRepositoryPort,
-} from './outbox.repository.port.js';
+import type { OutboxEventRecord, OutboxRepositoryPort } from './outbox.repository.port.js';
 
 export class DrizzleOutboxRepository implements OutboxRepositoryPort {
   constructor(private readonly db: NodePgDatabase<typeof schema>) {}

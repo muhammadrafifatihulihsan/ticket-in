@@ -7,10 +7,7 @@ import {
   type TicketStatus,
   type TicketWithDetails,
 } from '../domain/ticket.entity.js';
-import type {
-  IssueTicketsParams,
-  TicketRepositoryPort,
-} from '../domain/ticket.repository.port.js';
+import type { IssueTicketsParams, TicketRepositoryPort } from '../domain/ticket.repository.port.js';
 
 export interface MockTicketMetadata {
   seatNumber?: string;

@@ -1,6 +1,9 @@
 import type { Redis } from 'ioredis';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { EventDetail, EventSummary } from '../../../../src/modules/catalog/domain/event.entity.js';
+import type {
+  EventDetail,
+  EventSummary,
+} from '../../../../src/modules/catalog/domain/event.entity.js';
 import { RedisCatalogCache } from '../../../../src/modules/catalog/infrastructure/redis-catalog-cache.js';
 
 describe('RedisCatalogCache', () => {

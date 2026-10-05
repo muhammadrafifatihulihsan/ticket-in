@@ -3,10 +3,7 @@ import type {
   HoldSeatsResult,
   InventoryRepositoryPort,
 } from '../domain/inventory.repository.port.js';
-import {
-  DEFAULT_HOLD_TTL_SECONDS,
-  MAX_SEATS_PER_USER_PER_EVENT,
-} from '../domain/seat.entity.js';
+import { DEFAULT_HOLD_TTL_SECONDS, MAX_SEATS_PER_USER_PER_EVENT } from '../domain/seat.entity.js';
 
 export interface AutoHoldSeatsCommand {
   eventId: string;

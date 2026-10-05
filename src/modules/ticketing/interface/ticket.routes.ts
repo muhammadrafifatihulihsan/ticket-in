@@ -38,12 +38,7 @@ export function formatTicketResponse(ticket: TicketWithDetails): TicketResponse 
 }
 
 export function createTicketRoutes(options: TicketRoutesOptions): FastifyPluginAsync {
-  const {
-    getTicketUseCase,
-    listUserTicketsUseCase,
-    verifyTicketUseCase,
-    tokenService,
-  } = options;
+  const { getTicketUseCase, listUserTicketsUseCase, verifyTicketUseCase, tokenService } = options;
 
   const authPreHandlers = tokenService ? [createAuthMiddleware(tokenService)] : [];
 

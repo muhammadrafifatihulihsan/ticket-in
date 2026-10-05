@@ -3,10 +3,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { v7 as uuidv7 } from 'uuid';
 import * as schema from '../../../platform/db/schema.js';
 import { NotFoundError } from '../../../platform/errors/problem-details.js';
-import {
-  assertValidOrderTransition,
-  type OrderStatus,
-} from '../../order/domain/order.entity.js';
+import { assertValidOrderTransition, type OrderStatus } from '../../order/domain/order.entity.js';
 import type { PaymentRecord, PaymentStatus } from '../domain/payment.entity.js';
 import type {
   InitiatePaymentParams,

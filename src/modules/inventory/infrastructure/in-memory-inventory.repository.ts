@@ -165,7 +165,9 @@ export class InMemoryInventoryRepository implements InventoryRepositoryPort {
   }
 
   async releaseSeatHold(holdId: string, userId: string): Promise<boolean> {
-    const hold = this.holds.find((h) => h.id === holdId && h.userId === userId && h.status === 'ACTIVE');
+    const hold = this.holds.find(
+      (h) => h.id === holdId && h.userId === userId && h.status === 'ACTIVE',
+    );
     if (!hold) return false;
 
     hold.status = 'RELEASED';

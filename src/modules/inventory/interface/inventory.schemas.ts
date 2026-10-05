@@ -16,7 +16,11 @@ export const holdSpecificSeatsBodySchema = z.object({
 export const autoHoldSeatsBodySchema = z.object({
   eventId: z.string().min(1, 'eventId is required'),
   categoryId: z.string().min(1, 'categoryId is required'),
-  quantity: z.number().int().min(1, 'Quantity must be at least 1').max(4, 'Cannot select more than 4 seats'),
+  quantity: z
+    .number()
+    .int()
+    .min(1, 'Quantity must be at least 1')
+    .max(4, 'Cannot select more than 4 seats'),
   holdTtlSeconds: z.number().int().positive().optional(),
 });
 

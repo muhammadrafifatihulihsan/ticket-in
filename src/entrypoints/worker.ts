@@ -67,7 +67,10 @@ export function createWorker(options: WorkerOptions = {}) {
 }
 
 // Auto-run if executed as main file
-if (process.argv[1] && (process.argv[1].endsWith('worker.ts') || process.argv[1].endsWith('worker.js'))) {
+if (
+  process.argv[1] &&
+  (process.argv[1].endsWith('worker.ts') || process.argv[1].endsWith('worker.js'))
+) {
   const worker = createWorker();
   void worker.start().catch((err) => {
     console.error('Failed to start worker process:', err);

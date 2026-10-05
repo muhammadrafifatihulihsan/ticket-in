@@ -57,7 +57,10 @@ export class InMemoryCatalogRepository implements CatalogRepositoryPort {
     return this.mapToDetail(event);
   }
 
-  async createEvent(event: NewEventInput, categories: NewSeatCategoryInput[]): Promise<EventDetail> {
+  async createEvent(
+    event: NewEventInput,
+    categories: NewSeatCategoryInput[],
+  ): Promise<EventDetail> {
     const eventId = randomUUID();
     const now = new Date();
 

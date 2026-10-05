@@ -28,12 +28,16 @@ describe('Admission Token Middleware', () => {
 
     const admissionMiddleware = createAdmissionTokenMiddleware(tokenService);
 
-    app.get('/events/:id/seats', { preHandler: [admissionMiddleware] }, async (req: FastifyRequest, reply: FastifyReply) => {
-      return reply.status(200).send({
-        admitted: true,
-        admission: req.admission,
-      });
-    });
+    app.get(
+      '/events/:id/seats',
+      { preHandler: [admissionMiddleware] },
+      async (req: FastifyRequest, reply: FastifyReply) => {
+        return reply.status(200).send({
+          admitted: true,
+          admission: req.admission,
+        });
+      },
+    );
   });
 
   it('allows request with valid x-admission-token header', async () => {

@@ -5,13 +5,10 @@ export const createOrderBodySchema = z
     holdId: z.string().uuid().optional(),
     holdIds: z.array(z.string().uuid()).min(1).max(4).optional(),
   })
-  .refine(
-    (data) => Boolean(data.holdId) || Boolean(data.holdIds && data.holdIds.length > 0),
-    {
-      message: 'Either holdId or holdIds must be provided.',
-      path: ['holdId'],
-    },
-  );
+  .refine((data) => Boolean(data.holdId) || Boolean(data.holdIds && data.holdIds.length > 0), {
+    message: 'Either holdId or holdIds must be provided.',
+    path: ['holdId'],
+  });
 
 export type CreateOrderBody = z.infer<typeof createOrderBodySchema>;
 

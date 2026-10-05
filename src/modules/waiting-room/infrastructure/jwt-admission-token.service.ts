@@ -25,7 +25,11 @@ export class JwtAdmissionTokenService implements AdmissionTokenServicePort {
     });
   }
 
-  verifyToken(token: string, expectedEventId: string, expectedUserId: string): AdmissionTokenPayload {
+  verifyToken(
+    token: string,
+    expectedEventId: string,
+    expectedUserId: string,
+  ): AdmissionTokenPayload {
     try {
       const decoded = jwt.verify(token, this.secret, {
         algorithms: ['HS256'],

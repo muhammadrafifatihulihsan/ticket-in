@@ -1,16 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify';
-import {
-  UnauthorizedError,
-  ValidationError,
-} from '../../../platform/errors/problem-details.js';
+import { UnauthorizedError, ValidationError } from '../../../platform/errors/problem-details.js';
 import type { TokenService } from '../../identity/domain/token-service.port.js';
 import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
 import type { CheckoutPaymentUseCase } from '../application/checkout-payment.use-case.js';
 import type { ProcessPaymentWebhookUseCase } from '../application/process-payment-webhook.use-case.js';
-import {
-  checkoutPaymentBodySchema,
-  paymentWebhookBodySchema,
-} from './payment.schemas.js';
+import { checkoutPaymentBodySchema, paymentWebhookBodySchema } from './payment.schemas.js';
 
 export interface PaymentRoutesOptions {
   checkoutPaymentUseCase: CheckoutPaymentUseCase;
@@ -46,10 +40,8 @@ export function createPaymentRoutes(options: PaymentRoutesOptions): FastifyPlugi
       const rawSignature = req.headers['x-webhook-signature'];
       const rawTimestamp = req.headers['x-webhook-timestamp'];
 
-      const signature =
-        typeof rawSignature === 'string' ? rawSignature.trim() : undefined;
-      const timestampStr =
-        typeof rawTimestamp === 'string' ? rawTimestamp.trim() : undefined;
+      const signature = typeof rawSignature === 'string' ? rawSignature.trim() : undefined;
+      const timestampStr = typeof rawTimestamp === 'string' ? rawTimestamp.trim() : undefined;
 
       if (!signature) {
         throw new UnauthorizedError('Header X-Webhook-Signature is required.');

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DeterministicIdGenerator, UuidV7Generator } from '../../../src/platform/id/id-generator.js';
+import {
+  DeterministicIdGenerator,
+  UuidV7Generator,
+} from '../../../src/platform/id/id-generator.js';
 
 describe('IdGenerator Port', () => {
   it('UuidV7Generator generates unique RFC 9562 UUIDv7 strings', () => {

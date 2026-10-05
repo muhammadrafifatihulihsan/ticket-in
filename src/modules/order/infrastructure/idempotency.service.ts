@@ -21,9 +21,7 @@ export function canonicalizeJson(value: unknown): string {
     .filter(([_, val]) => val !== undefined)
     .sort(([a], [b]) => a.localeCompare(b));
 
-  const content = entries
-    .map(([k, v]) => `${JSON.stringify(k)}:${canonicalizeJson(v)}`)
-    .join(',');
+  const content = entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalizeJson(v)}`).join(',');
 
   return `{${content}}`;
 }

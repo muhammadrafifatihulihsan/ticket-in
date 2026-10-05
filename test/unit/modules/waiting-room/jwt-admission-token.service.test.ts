@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { JwtAdmissionTokenService } from '../../../../src/modules/waiting-room/infrastructure/jwt-admission-token.service.js';
-import { ForbiddenError, UnauthorizedError } from '../../../../src/platform/errors/problem-details.js';
+import {
+  ForbiddenError,
+  UnauthorizedError,
+} from '../../../../src/platform/errors/problem-details.js';
 
 describe('JwtAdmissionTokenService', () => {
   const secret = 'valid_secret_key_minimum_32_characters_12345';

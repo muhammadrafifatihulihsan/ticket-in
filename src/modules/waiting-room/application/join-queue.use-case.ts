@@ -25,7 +25,9 @@ export class JoinQueueUseCase {
     const position = await this.waitingRoom.joinQueue(eventId, userId, this.heartbeatTtl);
 
     if (position.status === 'QUEUED' && position.rank) {
-      const waitSeconds = Math.ceil((position.rank / this.admissionRate) * (this.admissionIntervalMs / 1000));
+      const waitSeconds = Math.ceil(
+        (position.rank / this.admissionRate) * (this.admissionIntervalMs / 1000),
+      );
       return {
         ...position,
         estimatedWaitSeconds: waitSeconds,

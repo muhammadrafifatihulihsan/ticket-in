@@ -1,5 +1,5 @@
 allowBuilds:
-  "@confluentinc/kafka-javascript": true
+  '@confluentinc/kafka-javascript': true
   argon2: true
   cpu-features: true
   esbuild: true

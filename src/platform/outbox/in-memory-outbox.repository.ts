@@ -1,7 +1,4 @@
-import type {
-  OutboxEventRecord,
-  OutboxRepositoryPort,
-} from './outbox.repository.port.js';
+import type { OutboxEventRecord, OutboxRepositoryPort } from './outbox.repository.port.js';
 
 export class InMemoryOutboxRepository implements OutboxRepositoryPort {
   private readonly events = new Map<string, OutboxEventRecord>();

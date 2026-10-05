@@ -1,11 +1,5 @@
-import type {
-  KafkaEnvelope,
-  MessageProducerPort,
-} from '../messaging/kafka-client.interface.js';
-import type {
-  OutboxEventRecord,
-  OutboxRepositoryPort,
-} from './outbox.repository.port.js';
+import type { KafkaEnvelope, MessageProducerPort } from '../messaging/kafka-client.interface.js';
+import type { OutboxEventRecord, OutboxRepositoryPort } from './outbox.repository.port.js';
 
 export interface OutboxPollerOptions {
   outboxRepository: OutboxRepositoryPort;

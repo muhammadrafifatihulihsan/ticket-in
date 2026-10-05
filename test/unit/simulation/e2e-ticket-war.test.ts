@@ -109,23 +109,27 @@ class InMemoryUserRepository implements UserRepository {
 
 /** Plain-text hasher – avoids slow Argon2 in unit tests. */
 class PlainPasswordHasher implements PasswordHasher {
-  async hash(plain: string): Promise<string> { return `hashed:${plain}`; }
-  async verify(plain: string, hash: string): Promise<boolean> { return hash === `hashed:${plain}`; }
+  async hash(plain: string): Promise<string> {
+    return `hashed:${plain}`;
+  }
+  async verify(plain: string, hash: string): Promise<boolean> {
+    return hash === `hashed:${plain}`;
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
-const EVENT_ID          = '01935b30-0000-7000-8000-000000000001';
-const CATEGORY_ID       = 'cat-vip-01';
-const WEBHOOK_SECRET    = 'super-secret-webhook-hmac-key-for-tests-2026';
+const EVENT_ID = '01935b30-0000-7000-8000-000000000001';
+const CATEGORY_ID = 'cat-vip-01';
+const WEBHOOK_SECRET = 'super-secret-webhook-hmac-key-for-tests-2026';
 const JWT_ACCESS_SECRET = 'super-secret-access-token-key-which-is-long-enough';
-const JWT_REFRESH_SECRET= 'super-secret-refresh-token-key-which-is-long-enough';
+const JWT_REFRESH_SECRET = 'super-secret-refresh-token-key-which-is-long-enough';
 const WAITING_ROOM_SECRET = 'super-secret-waiting-room-jwt-key-which-is-long';
-const TOTAL_SEATS       = 10;
-const WAR_PARTICIPANTS  = 10;
-const PASSWORD          = 'SecurePass@2026';
+const TOTAL_SEATS = 10;
+const WAR_PARTICIPANTS = 10;
+const PASSWORD = 'SecurePass@2026';
 
 // ---------------------------------------------------------------------------
 // TestSystem – wired in-memory
@@ -154,22 +158,35 @@ interface TestSystem {
 }
 
 function buildSystem(): TestSystem {
-  const clock  = new SystemClock();
-  const idGen  = new UuidV7Generator();
+  const clock = new SystemClock();
+  const idGen = new UuidV7Generator();
 
   // Identity
-  const userRepo         = new InMemoryUserRepository();
+  const userRepo = new InMemoryUserRepository();
   const refreshTokenRepo = new InMemoryRefreshTokenRepository();
-  const hasher           = new PlainPasswordHasher();
-  const tokenService     = new JwtTokenService(JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, '15m', '7d');
-  const registerUseCase  = new RegisterUseCase(userRepo, hasher, idGen, clock);
-  const loginUseCase     = new LoginUseCase(userRepo, refreshTokenRepo, hasher, tokenService, idGen, clock);
+  const hasher = new PlainPasswordHasher();
+  const tokenService = new JwtTokenService(JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, '15m', '7d');
+  const registerUseCase = new RegisterUseCase(userRepo, hasher, idGen, clock);
+  const loginUseCase = new LoginUseCase(
+    userRepo,
+    refreshTokenRepo,
+    hasher,
+    tokenService,
+    idGen,
+    clock,
+  );
 
   // Waiting Room
-  const waitingRoomRepo      = new InMemoryWaitingRoomRepository();
+  const waitingRoomRepo = new InMemoryWaitingRoomRepository();
   const admissionTokenService = new JwtAdmissionTokenService(WAITING_ROOM_SECRET);
-  const joinQueueUseCase     = new JoinQueueUseCase(waitingRoomRepo, { admissionRate: 50, admissionIntervalMs: 5000 });
-  const admitQueueUseCase    = new AdmitQueueUseCase(waitingRoomRepo, admissionTokenService, { defaultBatchSize: WAR_PARTICIPANTS, tokenTtlSeconds: 600 });
+  const joinQueueUseCase = new JoinQueueUseCase(waitingRoomRepo, {
+    admissionRate: 50,
+    admissionIntervalMs: 5000,
+  });
+  const admitQueueUseCase = new AdmitQueueUseCase(waitingRoomRepo, admissionTokenService, {
+    defaultBatchSize: WAR_PARTICIPANTS,
+    tokenTtlSeconds: 600,
+  });
 
   // Inventory – seed 10 VIP seats
   const inventoryRepo = new InMemoryInventoryRepository();
@@ -191,32 +208,44 @@ function buildSystem(): TestSystem {
   const holdSpecificSeatsUseCase = new HoldSpecificSeatsUseCase(inventoryRepo);
 
   // Order
-  const orderRepo          = new InMemoryOrderRepository();
+  const orderRepo = new InMemoryOrderRepository();
   const createOrderUseCase = new CreateOrderUseCase(orderRepo, idGen, clock);
 
   // Payment
-  const paymentRepo         = new InMemoryPaymentRepository(orderRepo);
-  const hmacService         = new HmacSignatureService(WEBHOOK_SECRET, clock);
+  const paymentRepo = new InMemoryPaymentRepository(orderRepo);
+  const hmacService = new HmacSignatureService(WEBHOOK_SECRET, clock);
   const processWebhookUseCase = new ProcessPaymentWebhookUseCase(paymentRepo, hmacService);
 
   // Ticketing
-  const ticketRepo            = new InMemoryTicketRepository();
-  const inboxRepo             = new InMemoryInboxRepository();
-  const inboxService          = new IdempotentInboxService(inboxRepo);
-  const issueTicketsUseCase   = new IssueTicketsUseCase(orderRepo, ticketRepo);
-  const verifyTicketUseCase   = new VerifyTicketUseCase(ticketRepo);
-  const listUserTicketsUseCase= new ListUserTicketsUseCase(ticketRepo);
-  const getTicketUseCase      = new GetTicketUseCase(ticketRepo);
-  const orderPaidHandler      = new OrderPaidEventHandler(issueTicketsUseCase, inboxService);
+  const ticketRepo = new InMemoryTicketRepository();
+  const inboxRepo = new InMemoryInboxRepository();
+  const inboxService = new IdempotentInboxService(inboxRepo);
+  const issueTicketsUseCase = new IssueTicketsUseCase(orderRepo, ticketRepo);
+  const verifyTicketUseCase = new VerifyTicketUseCase(ticketRepo);
+  const listUserTicketsUseCase = new ListUserTicketsUseCase(ticketRepo);
+  const getTicketUseCase = new GetTicketUseCase(ticketRepo);
+  const orderPaidHandler = new OrderPaidEventHandler(issueTicketsUseCase, inboxService);
 
   return {
-    registerUseCase, loginUseCase, tokenService,
-    joinQueueUseCase, admitQueueUseCase, admissionTokenService, waitingRoomRepo,
-    holdSpecificSeatsUseCase, inventoryRepo,
-    createOrderUseCase, orderRepo,
-    processWebhookUseCase, hmacService,
-    issueTicketsUseCase, verifyTicketUseCase, listUserTicketsUseCase, getTicketUseCase,
-    orderPaidHandler, ticketRepo,
+    registerUseCase,
+    loginUseCase,
+    tokenService,
+    joinQueueUseCase,
+    admitQueueUseCase,
+    admissionTokenService,
+    waitingRoomRepo,
+    holdSpecificSeatsUseCase,
+    inventoryRepo,
+    createOrderUseCase,
+    orderRepo,
+    processWebhookUseCase,
+    hmacService,
+    issueTicketsUseCase,
+    verifyTicketUseCase,
+    listUserTicketsUseCase,
+    getTicketUseCase,
+    orderPaidHandler,
+    ticketRepo,
   };
 }
 
@@ -229,21 +258,36 @@ async function registerAndLogin(
   index: number,
   role: 'user' | 'organizer' | 'admin' = 'user',
 ): Promise<{ userId: string; accessToken: string }> {
-  const email    = `participant${index}@ticketin.test`;
+  const email = `participant${index}@ticketin.test`;
   const username = `participant${index}`;
-  const registered = await system.registerUseCase.execute({ email, username, password: PASSWORD, role });
-  const loggedIn   = await system.loginUseCase.execute({ identifier: email, password: PASSWORD });
+  const registered = await system.registerUseCase.execute({
+    email,
+    username,
+    password: PASSWORD,
+    role,
+  });
+  const loggedIn = await system.loginUseCase.execute({ identifier: email, password: PASSWORD });
   return { userId: registered.id, accessToken: loggedIn.tokens.accessToken };
 }
 
 async function simulatePaymentWebhook(system: TestSystem, orderId: string): Promise<void> {
-  const timestamp    = Math.floor(Date.now() / 1000);
-  const webhookPayload = { orderId, externalId: `ext-${randomUUID()}`, status: 'SUCCESS' as const, amount: 1_500_000, timestamp };
-  const signature    = system.hmacService.generateSignature(webhookPayload, timestamp);
+  const timestamp = Math.floor(Date.now() / 1000);
+  const webhookPayload = {
+    orderId,
+    externalId: `ext-${randomUUID()}`,
+    status: 'SUCCESS' as const,
+    amount: 1_500_000,
+    timestamp,
+  };
+  const signature = system.hmacService.generateSignature(webhookPayload, timestamp);
   await system.processWebhookUseCase.execute({ signature, timestamp, payload: webhookPayload });
 }
 
-async function dispatchOutboxEvent(system: TestSystem, orderId: string, userId: string): Promise<void> {
+async function dispatchOutboxEvent(
+  system: TestSystem,
+  orderId: string,
+  userId: string,
+): Promise<void> {
   const envelope: KafkaEnvelope<OrderPaidPayload> = {
     id: `outbox-${orderId}`,
     eventType: 'order.paid',
@@ -265,12 +309,20 @@ function bridgeHoldToOrder(
 ): void {
   const invSeat = (sys.inventoryRepo as any)['seats'].find((s: StoredSeat) => s.id === seatId)!;
   const orderHold: InMemoryHoldRecord = {
-    id: holdId, userId, eventId: EVENT_ID,
-    status: 'ACTIVE', expiresAt, seatIds: [seatId],
+    id: holdId,
+    userId,
+    eventId: EVENT_ID,
+    status: 'ACTIVE',
+    expiresAt,
+    seatIds: [seatId],
   };
   const orderSeat: InMemorySeatRecord = {
-    id: invSeat.id, eventId: invSeat.eventId, seatNumber: invSeat.seatNumber,
-    categoryName: invSeat.categoryName, price: invSeat.price, status: 'HELD',
+    id: invSeat.id,
+    eventId: invSeat.eventId,
+    seatNumber: invSeat.seatNumber,
+    categoryName: invSeat.categoryName,
+    price: invSeat.price,
+    status: 'HELD',
   };
   sys.orderRepo.setHold(orderHold);
   sys.orderRepo.setSeat(orderSeat);
@@ -318,7 +370,9 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
 
       // 4. Hold a seat
       const holdResult = await sys.holdSpecificSeatsUseCase.execute({
-        eventId: EVENT_ID, userId, seatIds: ['seat-001'],
+        eventId: EVENT_ID,
+        userId,
+        seatIds: ['seat-001'],
       });
       expect(holdResult.holds).toHaveLength(1);
       const hold = holdResult.holds[0]!;
@@ -352,13 +406,17 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       expect(userTickets[0]!.id).toBe(tickets[0]!.id);
 
       // 9. Get individual ticket (IDOR: own ticket accessible)
-      const fetchedTicket = await sys.getTicketUseCase.execute({ ticketId: tickets[0]!.id, requestingUserId: userId });
+      const fetchedTicket = await sys.getTicketUseCase.execute({
+        ticketId: tickets[0]!.id,
+        requestingUserId: userId,
+      });
       expect(fetchedTicket).not.toBeNull();
       expect(fetchedTicket!.id).toBe(tickets[0]!.id);
 
       // 10. Organizer gate check-in
       const checkedIn = await sys.verifyTicketUseCase.execute({
-        ticketIdOrCode: tickets[0]!.id, verifierRole: 'organizer',
+        ticketIdOrCode: tickets[0]!.id,
+        verifierRole: 'organizer',
       });
       expect(checkedIn.status).toBe('CHECKED_IN');
 
@@ -376,19 +434,34 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
         Array.from({ length: WAR_PARTICIPANTS }, (_, i) => registerAndLogin(sys, i + 1)),
       );
 
-      await Promise.all(participants.map(({ userId }) => sys.joinQueueUseCase.execute(EVENT_ID, userId)));
+      await Promise.all(
+        participants.map(({ userId }) => sys.joinQueueUseCase.execute(EVENT_ID, userId)),
+      );
       await sys.admitQueueUseCase.execute(EVENT_ID, WAR_PARTICIPANTS);
 
-      const seatIds = Array.from({ length: TOTAL_SEATS }, (_, i) => `seat-${String(i + 1).padStart(3, '0')}`);
+      const seatIds = Array.from(
+        { length: TOTAL_SEATS },
+        (_, i) => `seat-${String(i + 1).padStart(3, '0')}`,
+      );
 
       const holdResults = await Promise.allSettled(
         participants.map(({ userId }, idx) =>
-          sys.holdSpecificSeatsUseCase.execute({ eventId: EVENT_ID, userId, seatIds: [seatIds[idx]!] }),
+          sys.holdSpecificSeatsUseCase.execute({
+            eventId: EVENT_ID,
+            userId,
+            seatIds: [seatIds[idx]!],
+          }),
         ),
       );
       expect(holdResults.filter((r) => r.status === 'fulfilled')).toHaveLength(WAR_PARTICIPANTS);
 
-      type PCtx = { userId: string; holdId: string; seatId: string; orderId?: string; ticketId?: string };
+      type PCtx = {
+        userId: string;
+        holdId: string;
+        seatId: string;
+        orderId?: string;
+        ticketId?: string;
+      };
       const contexts: PCtx[] = participants.map(({ userId }, idx) => {
         const r = holdResults[idx];
         if (!r || r.status !== 'fulfilled') throw new Error('Hold unexpectedly failed');
@@ -401,18 +474,24 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       }
 
       const orderResults = await Promise.all(
-        contexts.map((ctx) => sys.createOrderUseCase.execute({ userId: ctx.userId, holdId: ctx.holdId })),
+        contexts.map((ctx) =>
+          sys.createOrderUseCase.execute({ userId: ctx.userId, holdId: ctx.holdId }),
+        ),
       );
       for (let i = 0; i < contexts.length; i++) contexts[i]!.orderId = orderResults[i]!.id;
 
       await Promise.all(contexts.map((ctx) => simulatePaymentWebhook(sys, ctx.orderId!)));
 
-      const paidOrders = await Promise.all(contexts.map((ctx) => sys.orderRepo.findById(ctx.orderId!)));
+      const paidOrders = await Promise.all(
+        contexts.map((ctx) => sys.orderRepo.findById(ctx.orderId!)),
+      );
       for (const o of paidOrders) expect(o!.status).toBe('PAID');
 
       await Promise.all(contexts.map((ctx) => dispatchOutboxEvent(sys, ctx.orderId!, ctx.userId)));
 
-      const allTicketLists = await Promise.all(contexts.map((ctx) => sys.ticketRepo.findByOrderId(ctx.orderId!)));
+      const allTicketLists = await Promise.all(
+        contexts.map((ctx) => sys.ticketRepo.findByOrderId(ctx.orderId!)),
+      );
       const allTickets = allTicketLists.flat();
 
       // Invariant 1: Zero overselling
@@ -435,7 +514,10 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       for (let i = 0; i < contexts.length; i++) contexts[i]!.ticketId = allTicketLists[i]![0]!.id;
       const checkIns = await Promise.all(
         contexts.map((ctx) =>
-          sys.verifyTicketUseCase.execute({ ticketIdOrCode: ctx.ticketId!, verifierRole: 'organizer' }),
+          sys.verifyTicketUseCase.execute({
+            ticketIdOrCode: ctx.ticketId!,
+            verifierRole: 'organizer',
+          }),
         ),
       );
       for (const ci of checkIns) expect(ci.status).toBe('CHECKED_IN');
@@ -452,7 +534,11 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       await sys.joinQueueUseCase.execute(EVENT_ID, userId);
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
-      const holdResult = await sys.holdSpecificSeatsUseCase.execute({ eventId: EVENT_ID, userId, seatIds: ['seat-001'] });
+      const holdResult = await sys.holdSpecificSeatsUseCase.execute({
+        eventId: EVENT_ID,
+        userId,
+        seatIds: ['seat-001'],
+      });
       const hold = holdResult.holds[0]!;
       bridgeHoldToOrder(sys, hold.id, userId, 'seat-001', hold.expiresAt);
 
@@ -494,7 +580,8 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
       const batch = await sys.holdSpecificSeatsUseCase.execute({
-        eventId: EVENT_ID, userId,
+        eventId: EVENT_ID,
+        userId,
         seatIds: ['seat-001', 'seat-002', 'seat-003', 'seat-004'],
       });
       expect(batch.holds).toHaveLength(4);
@@ -511,7 +598,8 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
 
       await expect(
         sys.holdSpecificSeatsUseCase.execute({
-          eventId: EVENT_ID, userId,
+          eventId: EVENT_ID,
+          userId,
           seatIds: ['seat-001', 'seat-002', 'seat-003', 'seat-004', 'seat-005'],
         }),
       ).rejects.toThrow(/Cannot reserve more than/);
@@ -523,14 +611,16 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
   // -------------------------------------------------------------------------
   describe('Scenario 4: IDOR protection - ticket ownership enforcement', () => {
     it('returns null when a different user requests a ticket they do not own', async () => {
-      const owner    = await registerAndLogin(sys, 300);
+      const owner = await registerAndLogin(sys, 300);
       const intruder = await registerAndLogin(sys, 301);
 
       await sys.joinQueueUseCase.execute(EVENT_ID, owner.userId);
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
       const holdResult = await sys.holdSpecificSeatsUseCase.execute({
-        eventId: EVENT_ID, userId: owner.userId, seatIds: ['seat-001'],
+        eventId: EVENT_ID,
+        userId: owner.userId,
+        seatIds: ['seat-001'],
       });
       const hold = holdResult.holds[0]!;
       bridgeHoldToOrder(sys, hold.id, owner.userId, 'seat-001', hold.expiresAt);
@@ -544,7 +634,10 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       const ticketId = ownerTickets[0]!.id;
 
       // Owner can read own ticket
-      const ownedTicket = await sys.getTicketUseCase.execute({ ticketId, requestingUserId: owner.userId });
+      const ownedTicket = await sys.getTicketUseCase.execute({
+        ticketId,
+        requestingUserId: owner.userId,
+      });
       expect(ownedTicket).not.toBeNull();
       expect(ownedTicket!.userId).toBe(owner.userId);
 
@@ -564,7 +657,9 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
       const holdResult = await sys.holdSpecificSeatsUseCase.execute({
-        eventId: EVENT_ID, userId: owner.userId, seatIds: ['seat-001'],
+        eventId: EVENT_ID,
+        userId: owner.userId,
+        seatIds: ['seat-001'],
       });
       const hold = holdResult.holds[0]!;
       bridgeHoldToOrder(sys, hold.id, owner.userId, 'seat-001', hold.expiresAt);
@@ -582,7 +677,10 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       ).rejects.toThrow(ForbiddenError);
 
       // 'organizer' role succeeds
-      const checkedIn = await sys.verifyTicketUseCase.execute({ ticketIdOrCode: ticketId, verifierRole: 'organizer' });
+      const checkedIn = await sys.verifyTicketUseCase.execute({
+        ticketIdOrCode: ticketId,
+        verifierRole: 'organizer',
+      });
       expect(checkedIn.status).toBe('CHECKED_IN');
     });
   });
@@ -596,7 +694,11 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       await sys.joinQueueUseCase.execute(EVENT_ID, userId);
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
-      const holdResult = await sys.holdSpecificSeatsUseCase.execute({ eventId: EVENT_ID, userId, seatIds: ['seat-001'] });
+      const holdResult = await sys.holdSpecificSeatsUseCase.execute({
+        eventId: EVENT_ID,
+        userId,
+        seatIds: ['seat-001'],
+      });
       const hold = holdResult.holds[0]!;
       bridgeHoldToOrder(sys, hold.id, userId, 'seat-001', hold.expiresAt);
 
@@ -608,7 +710,10 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       const ticketId = tickets[0]!.id;
 
       // First scan succeeds
-      const first = await sys.verifyTicketUseCase.execute({ ticketIdOrCode: ticketId, verifierRole: 'organizer' });
+      const first = await sys.verifyTicketUseCase.execute({
+        ticketIdOrCode: ticketId,
+        verifierRole: 'organizer',
+      });
       expect(first.status).toBe('CHECKED_IN');
 
       // Second scan throws ConflictError
@@ -635,7 +740,11 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       await sys.joinQueueUseCase.execute(EVENT_ID, userId);
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
-      const holdResult = await sys.holdSpecificSeatsUseCase.execute({ eventId: EVENT_ID, userId, seatIds: ['seat-001'] });
+      const holdResult = await sys.holdSpecificSeatsUseCase.execute({
+        eventId: EVENT_ID,
+        userId,
+        seatIds: ['seat-001'],
+      });
       const hold = holdResult.holds[0]!;
       bridgeHoldToOrder(sys, hold.id, userId, 'seat-001', hold.expiresAt);
 
@@ -647,7 +756,10 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       expect(tickets).toHaveLength(1);
       expect(tickets[0]!.status).toBe('ISSUED');
 
-      const fetched = await sys.getTicketUseCase.execute({ ticketId: tickets[0]!.id, requestingUserId: userId });
+      const fetched = await sys.getTicketUseCase.execute({
+        ticketId: tickets[0]!.id,
+        requestingUserId: userId,
+      });
       expect(fetched).not.toBeNull();
       expect(fetched!.status).toBe('ISSUED');
     });
@@ -662,7 +774,11 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
       await sys.joinQueueUseCase.execute(EVENT_ID, userId);
       await sys.admitQueueUseCase.execute(EVENT_ID, 10);
 
-      const holdResult = await sys.holdSpecificSeatsUseCase.execute({ eventId: EVENT_ID, userId, seatIds: ['seat-001'] });
+      const holdResult = await sys.holdSpecificSeatsUseCase.execute({
+        eventId: EVENT_ID,
+        userId,
+        seatIds: ['seat-001'],
+      });
       const hold = holdResult.holds[0]!;
       bridgeHoldToOrder(sys, hold.id, userId, 'seat-001', hold.expiresAt);
 
@@ -670,11 +786,20 @@ describe('Phase 12 - End-to-End Ticket War Simulation', () => {
 
       // Simulate FAILED payment webhook
       const localClock = new SystemClock();
-      const localHmac  = new HmacSignatureService(WEBHOOK_SECRET, localClock);
-      const timestamp  = Math.floor(Date.now() / 1000);
-      const failedPayload = { orderId: order.id, externalId: `ext-failed-${randomUUID()}`, status: 'FAILED' as const, timestamp };
+      const localHmac = new HmacSignatureService(WEBHOOK_SECRET, localClock);
+      const timestamp = Math.floor(Date.now() / 1000);
+      const failedPayload = {
+        orderId: order.id,
+        externalId: `ext-failed-${randomUUID()}`,
+        status: 'FAILED' as const,
+        timestamp,
+      };
       const sig = localHmac.generateSignature(failedPayload, timestamp);
-      await sys.processWebhookUseCase.execute({ signature: sig, timestamp, payload: failedPayload });
+      await sys.processWebhookUseCase.execute({
+        signature: sig,
+        timestamp,
+        payload: failedPayload,
+      });
 
       const cancelledOrder = await sys.orderRepo.findById(order.id);
       expect(cancelledOrder!.status).toBe('CANCELLED');

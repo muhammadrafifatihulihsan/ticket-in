@@ -3,10 +3,17 @@ import { FrozenClock } from '../../../../src/platform/clock/clock.js';
 import { UnauthorizedError } from '../../../../src/platform/errors/problem-details.js';
 import { DeterministicIdGenerator } from '../../../../src/platform/id/id-generator.js';
 import { LoginUseCase } from '../../../../src/modules/identity/application/login.use-case.js';
-import type { RefreshTokenRepository, TokenFamilyRecord } from '../../../../src/modules/identity/application/ports/refresh-token.repository.port.js';
+import type {
+  RefreshTokenRepository,
+  TokenFamilyRecord,
+} from '../../../../src/modules/identity/application/ports/refresh-token.repository.port.js';
 import type { UserRepository } from '../../../../src/modules/identity/application/ports/user.repository.port.js';
 import type { PasswordHasher } from '../../../../src/modules/identity/domain/password-hasher.port.js';
-import type { AccessTokenPayload, RefreshTokenPayload, TokenService } from '../../../../src/modules/identity/domain/token-service.port.js';
+import type {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  TokenService,
+} from '../../../../src/modules/identity/domain/token-service.port.js';
 import { User } from '../../../../src/modules/identity/domain/user.entity.js';
 
 class MockUserRepository implements UserRepository {
