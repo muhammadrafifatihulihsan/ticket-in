@@ -1,4 +1,4 @@
-export type SeatStatus = 'AVAILABLE' | 'HELD' | 'SOLD';
+export type SeatStatus = 'AVAILABLE' | 'HELD' | 'RESERVED' | 'SOLD';
 
 export type SeatHoldStatus = 'ACTIVE' | 'EXPIRED' | 'RELEASED' | 'CONVERTED_TO_ORDER';
 
