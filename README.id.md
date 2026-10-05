@@ -162,6 +162,7 @@ Tanda Tangan = HMAC-SHA256(secret, timestamp + "." + raw_body)
 ```
 
 Handler webhook memvalidasi:
+
 1. Header `X-Webhook-Signature` cocok dengan HMAC yang dihitung.
 2. `X-Webhook-Timestamp` berada dalam window 300 detik dari `Date.now()` - mencegah webhook hasil rekaman lama yang diputar ulang.
 3. Raw body dibaca sebelum parsing JSON untuk memastikan verifikasi tanda tangan yang byte-exact.
@@ -186,12 +187,12 @@ Request duplikat bersamaan dengan kunci yang sama keduanya memeriksa basis data 
 
 Empat invarian basis data diperiksa secara otomatis setelah setiap uji beban dan uji kekacauan (`pnpm run db:check-invariants`):
 
-| Invarian | Query | Hasil yang Diharapkan |
-|----------|-------|----------------------|
-| Zero Overselling | `SELECT seat_id, COUNT(*) FROM tickets WHERE status='ISSUED' GROUP BY seat_id HAVING COUNT(*) > 1` | 0 baris |
-| Zero Orphan Hold | `SELECT id FROM seat_holds WHERE status='ACTIVE' AND expires_at < NOW() - INTERVAL '30 seconds'` | 0 baris |
-| Pesanan PAID Punya Tiket | Setiap `orders.status='PAID'` memiliki minimal 1 `tickets.status='ISSUED'` | 0 pelanggaran |
-| Keseimbangan Finansial | `SUM(tickets.price)` = `SUM(orders.total_amount)` untuk semua pesanan PAID | 0 selisih |
+| Invarian                 | Query                                                                                              | Hasil yang Diharapkan |
+| ------------------------ | -------------------------------------------------------------------------------------------------- | --------------------- |
+| Zero Overselling         | `SELECT seat_id, COUNT(*) FROM tickets WHERE status='ISSUED' GROUP BY seat_id HAVING COUNT(*) > 1` | 0 baris               |
+| Zero Orphan Hold         | `SELECT id FROM seat_holds WHERE status='ACTIVE' AND expires_at < NOW() - INTERVAL '30 seconds'`   | 0 baris               |
+| Pesanan PAID Punya Tiket | Setiap `orders.status='PAID'` memiliki minimal 1 `tickets.status='ISSUED'`                         | 0 pelanggaran         |
+| Keseimbangan Finansial   | `SUM(tickets.price)` = `SUM(orders.total_amount)` untuk semua pesanan PAID                         | 0 selisih             |
 
 Satu pelanggaran invarian akan keluar dengan kode 1 dan menggagalkan pipeline CI.
 
@@ -214,23 +215,23 @@ test/
 
 **Skenario Uji Beban k6:**
 
-| Skenario | Profil Beban | Ambang Batas |
-|----------|-------------|--------------|
-| A: Baseline Browse | 50 VU, 2 menit | p95 < 50ms, error < 0.1% |
-| B: Queue Surge | Lonjakan 1.000 VU | p95 < 100ms, zero dropped connections |
-| C: Seat Hold Battle | 500 VU, 100 kursi | Tepat 100 HELD, p95 < 200ms |
-| D: End-to-End War | 1.000 VU alur penuh | p95 < 350ms, zero overselling |
-| E: Hold Expiry Spike | 200 VU, tanpa bayar | Kursi kembali AVAILABLE tepat waktu |
-| F: Webhook Flood | 100 VU webhook campuran | Zero corrupt state, 100% konsisten |
+| Skenario             | Profil Beban            | Ambang Batas                          |
+| -------------------- | ----------------------- | ------------------------------------- |
+| A: Baseline Browse   | 50 VU, 2 menit          | p95 < 50ms, error < 0.1%              |
+| B: Queue Surge       | Lonjakan 1.000 VU       | p95 < 100ms, zero dropped connections |
+| C: Seat Hold Battle  | 500 VU, 100 kursi       | Tepat 100 HELD, p95 < 200ms           |
+| D: End-to-End War    | 1.000 VU alur penuh     | p95 < 350ms, zero overselling         |
+| E: Hold Expiry Spike | 200 VU, tanpa bayar     | Kursi kembali AVAILABLE tepat waktu   |
+| F: Webhook Flood     | 100 VU webhook campuran | Zero corrupt state, 100% konsisten    |
 
 **Skenario Chaos Engineering (Toxiproxy):**
 
-| Skenario | Kesalahan yang Diinjeksi | Perilaku yang Diverifikasi |
-|----------|------------------------|---------------------------|
-| Chaos 1 | Redis terputus total | API beralih ke local rate limiter, baca PostgreSQL langsung |
-| Chaos 2 | Latensi PostgreSQL 500ms + pembatasan koneksi | Graceful HTTP 503, proses tidak crash |
-| Chaos 3 | Kafka mati saat checkout | Pesanan tercatat di PostgreSQL, outbox terkirim setelah recovery |
-| Chaos 4 | Penundaan webhook hingga 15 menit | Logika kompensasi: re-confirm atau auto-refund, deterministik |
+| Skenario | Kesalahan yang Diinjeksi                      | Perilaku yang Diverifikasi                                       |
+| -------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| Chaos 1  | Redis terputus total                          | API beralih ke local rate limiter, baca PostgreSQL langsung      |
+| Chaos 2  | Latensi PostgreSQL 500ms + pembatasan koneksi | Graceful HTTP 503, proses tidak crash                            |
+| Chaos 3  | Kafka mati saat checkout                      | Pesanan tercatat di PostgreSQL, outbox terkirim setelah recovery |
+| Chaos 4  | Penundaan webhook hingga 15 menit             | Logika kompensasi: re-confirm atau auto-refund, deterministik    |
 
 ---
 
@@ -238,13 +239,14 @@ test/
 
 Stack observabilitas lengkap yang di-provisioning via Docker Compose:
 
-| Komponen | Tujuan |
-|----------|--------|
-| Prometheus | Pengambilan metrik dari `prom-client` (endpoint `/metrics`) |
-| Grafana | 5 dasbor pre-provisioned sebagai kode (JSON) |
+| Komponen      | Tujuan                                                               |
+| ------------- | -------------------------------------------------------------------- |
+| Prometheus    | Pengambilan metrik dari `prom-client` (endpoint `/metrics`)          |
+| Grafana       | 5 dasbor pre-provisioned sebagai kode (JSON)                         |
 | OpenTelemetry | Konteks trace dipropagasikan antar batas proses melalui header Kafka |
 
 **5 Dasbor Grafana:**
+
 1. **Application Health & HTTP Performance** - RPS, error rate, latensi p50/p95/p99
 2. **Database Performance & Connection Pool** - Latensi query, lock wait time, utilisasi pool
 3. **Kafka Health & Consumer Lag** - Kesehatan broker, topic lag, backlog outbox
@@ -267,6 +269,7 @@ Workflow GitHub Actions dengan 6 quality gate berurutan (`.github/workflows/ci.y
 ```
 
 **Penjaga Arsitektur** (`dependency-cruiser`):
+
 - Tidak ada dependensi sirkular di seluruh codebase.
 - Modul hanya boleh mengimpor dari barrel publik `index.js` modul lain - tidak pernah dari path internal `domain/`, `application/`, `infrastructure/`, atau `interface/`.
 - Lapisan `domain/` memiliki nol dependensi eksternal (TypeScript murni, tanpa I/O).
@@ -275,26 +278,26 @@ Workflow GitHub Actions dengan 6 quality gate berurutan (`.github/workflows/ci.y
 
 ## Tech Stack
 
-| Lapisan | Teknologi | Alasan |
-|---------|-----------|--------|
-| HTTP Framework | Fastify v5 | Plugin encapsulation, validasi skema bawaan, throughput tinggi |
-| Bahasa | TypeScript 5 (strict) | Zero implicit any, type safety eksplisit di semua batas |
-| ORM / Query | Drizzle ORM + node-postgres | SQL type-safe, raw SQL untuk critical section (row locking) |
-| Basis Data Utama | PostgreSQL 16 | Transaksi ACID, row-level locking, partial unique index |
-| Cache / Antrean | Redis 7 | ZSET untuk ruang tunggu FIFO, skrip Lua atomik |
-| Message Broker | Apache Kafka KRaft | At-least-once delivery, manajemen offset consumer group |
-| Driver Kafka | @confluentinc/kafka-javascript | Driver resmi Confluent dengan binding librdkafka |
-| Hash Password | argon2id | Parameter yang direkomendasikan OWASP (64MB memori, 3 iterasi) |
-| Validasi Skema | Zod + fastify-type-provider-zod | Validasi runtime dengan inferensi tipe TypeScript |
-| Pengenal | UUIDv7 | Berurutan waktu, efisien index B-tree, bebas tabrakan |
-| Metrik | prom-client | Metrik kompatibel Prometheus, counter bisnis kustom |
-| Logging Terstruktur | Pino | Log JSON dengan redaksi PII (password, token, authorization) |
-| Package Manager | pnpm | Hoisting ketat, dukungan workspace |
-| Test Framework | Vitest | Native ESM, eksekusi cepat, kompatibel dengan Testcontainers |
-| Integration Test | Testcontainers | Container infrastruktur nyata, tanpa mock pada batas I/O |
-| Load Testing | k6 | Skenario berbasis skrip dengan assertion threshold |
-| Chaos Testing | Toxiproxy | Injeksi kesalahan jaringan (latensi, disconnect, jitter) |
-| Validasi Arsitektur | dependency-cruiser | Tegakkan aturan batas modul di CI |
+| Lapisan             | Teknologi                       | Alasan                                                         |
+| ------------------- | ------------------------------- | -------------------------------------------------------------- |
+| HTTP Framework      | Fastify v5                      | Plugin encapsulation, validasi skema bawaan, throughput tinggi |
+| Bahasa              | TypeScript 5 (strict)           | Zero implicit any, type safety eksplisit di semua batas        |
+| ORM / Query         | Drizzle ORM + node-postgres     | SQL type-safe, raw SQL untuk critical section (row locking)    |
+| Basis Data Utama    | PostgreSQL 16                   | Transaksi ACID, row-level locking, partial unique index        |
+| Cache / Antrean     | Redis 7                         | ZSET untuk ruang tunggu FIFO, skrip Lua atomik                 |
+| Message Broker      | Apache Kafka KRaft              | At-least-once delivery, manajemen offset consumer group        |
+| Driver Kafka        | @confluentinc/kafka-javascript  | Driver resmi Confluent dengan binding librdkafka               |
+| Hash Password       | argon2id                        | Parameter yang direkomendasikan OWASP (64MB memori, 3 iterasi) |
+| Validasi Skema      | Zod + fastify-type-provider-zod | Validasi runtime dengan inferensi tipe TypeScript              |
+| Pengenal            | UUIDv7                          | Berurutan waktu, efisien index B-tree, bebas tabrakan          |
+| Metrik              | prom-client                     | Metrik kompatibel Prometheus, counter bisnis kustom            |
+| Logging Terstruktur | Pino                            | Log JSON dengan redaksi PII (password, token, authorization)   |
+| Package Manager     | pnpm                            | Hoisting ketat, dukungan workspace                             |
+| Test Framework      | Vitest                          | Native ESM, eksekusi cepat, kompatibel dengan Testcontainers   |
+| Integration Test    | Testcontainers                  | Container infrastruktur nyata, tanpa mock pada batas I/O       |
+| Load Testing        | k6                              | Skenario berbasis skrip dengan assertion threshold             |
+| Chaos Testing       | Toxiproxy                       | Injeksi kesalahan jaringan (latensi, disconnect, jitter)       |
+| Validasi Arsitektur | dependency-cruiser              | Tegakkan aturan batas modul di CI                              |
 
 ---
 
@@ -366,11 +369,11 @@ ticket-in/
 
 ## Indeks Dokumentasi
 
-| Dokumen | Isi |
-|---------|-----|
-| [`docs/architecture.md`](./docs/architecture.md) | Topologi tiga proses, diagram urutan, state machine, kebijakan degradasi |
-| [`docs/database-schema.md`](./docs/database-schema.md) | Skema PostgreSQL lengkap, konvensi UUIDv7, partial index, tabel outbox/inbox |
-| [`docs/api-routes.md`](./docs/api-routes.md) | Semua endpoint REST, header yang wajib, matriks kode status HTTP |
-| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | Model ancaman STRIDE, kontrol OWASP ASVS Level 2, mitigasi bot |
-| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md) | Setup Windows dan Linux, Docker Compose profiles |
-| [`docs/PLAN.md`](./docs/PLAN.md) | Dokumen desain engineering penuh: 30-seksi analisis, ADR, semua rencana fase |
+| Dokumen                                                            | Isi                                                                          |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| [`docs/architecture.md`](./docs/architecture.md)                   | Topologi tiga proses, diagram urutan, state machine, kebijakan degradasi     |
+| [`docs/database-schema.md`](./docs/database-schema.md)             | Skema PostgreSQL lengkap, konvensi UUIDv7, partial index, tabel outbox/inbox |
+| [`docs/api-routes.md`](./docs/api-routes.md)                       | Semua endpoint REST, header yang wajib, matriks kode status HTTP             |
+| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | Model ancaman STRIDE, kontrol OWASP ASVS Level 2, mitigasi bot               |
+| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md)   | Setup Windows dan Linux, Docker Compose profiles                             |
+| [`docs/PLAN.md`](./docs/PLAN.md)                                   | Dokumen desain engineering penuh: 30-seksi analisis, ADR, semua rencana fase |

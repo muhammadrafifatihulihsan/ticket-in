@@ -162,6 +162,7 @@ Signature = HMAC-SHA256(secret, timestamp + "." + raw_body)
 ```
 
 The webhook handler validates:
+
 1. `X-Webhook-Signature` header matches the computed HMAC.
 2. `X-Webhook-Timestamp` is within a 300-second window of `Date.now()` - prevents replayed captured webhooks.
 3. Raw body is read before JSON parsing to ensure byte-exact signature verification.
@@ -186,12 +187,12 @@ Concurrent duplicate requests for the same key both check the database atomicall
 
 Four database invariants are checked automatically after every load test and chaos test run (`pnpm run db:check-invariants`):
 
-| Invariant | Query | Expected Result |
-|-----------|-------|-----------------|
-| Zero Overselling | `SELECT seat_id, COUNT(*) FROM tickets WHERE status='ISSUED' GROUP BY seat_id HAVING COUNT(*) > 1` | 0 rows |
-| Zero Orphan Hold | `SELECT id FROM seat_holds WHERE status='ACTIVE' AND expires_at < NOW() - INTERVAL '30 seconds'` | 0 rows |
-| Paid Orders Have Tickets | Every `orders.status='PAID'` has at least 1 `tickets.status='ISSUED'` | 0 violations |
-| Financial Balance | `SUM(tickets.price)` = `SUM(orders.total_amount)` for all PAID orders | 0 discrepancy |
+| Invariant                | Query                                                                                              | Expected Result |
+| ------------------------ | -------------------------------------------------------------------------------------------------- | --------------- |
+| Zero Overselling         | `SELECT seat_id, COUNT(*) FROM tickets WHERE status='ISSUED' GROUP BY seat_id HAVING COUNT(*) > 1` | 0 rows          |
+| Zero Orphan Hold         | `SELECT id FROM seat_holds WHERE status='ACTIVE' AND expires_at < NOW() - INTERVAL '30 seconds'`   | 0 rows          |
+| Paid Orders Have Tickets | Every `orders.status='PAID'` has at least 1 `tickets.status='ISSUED'`                              | 0 violations    |
+| Financial Balance        | `SUM(tickets.price)` = `SUM(orders.total_amount)` for all PAID orders                              | 0 discrepancy   |
 
 Any violation exits with code 1 and fails the CI pipeline.
 
@@ -214,23 +215,23 @@ test/
 
 **k6 Load Test Scenarios:**
 
-| Scenario | Load Profile | Threshold |
-|----------|-------------|-----------|
-| A: Baseline Browse | 50 VU, 2 min | p95 < 50ms, error < 0.1% |
-| B: Queue Surge | 1,000 VU spike | p95 < 100ms, zero dropped connections |
-| C: Seat Hold Battle | 500 VU, 100 seats | Exactly 100 HELD, p95 < 200ms |
-| D: End-to-End War | 1,000 VU full flow | p95 < 350ms, zero overselling |
-| E: Hold Expiry Spike | 200 VU, no payment | Seats return AVAILABLE on time |
-| F: Webhook Flood | 100 VU mixed webhooks | Zero corrupt state, 100% consistent |
+| Scenario             | Load Profile          | Threshold                             |
+| -------------------- | --------------------- | ------------------------------------- |
+| A: Baseline Browse   | 50 VU, 2 min          | p95 < 50ms, error < 0.1%              |
+| B: Queue Surge       | 1,000 VU spike        | p95 < 100ms, zero dropped connections |
+| C: Seat Hold Battle  | 500 VU, 100 seats     | Exactly 100 HELD, p95 < 200ms         |
+| D: End-to-End War    | 1,000 VU full flow    | p95 < 350ms, zero overselling         |
+| E: Hold Expiry Spike | 200 VU, no payment    | Seats return AVAILABLE on time        |
+| F: Webhook Flood     | 100 VU mixed webhooks | Zero corrupt state, 100% consistent   |
 
 **Chaos Engineering Scenarios (Toxiproxy):**
 
-| Scenario | Fault Injected | Verified Behavior |
-|----------|---------------|-------------------|
-| Chaos 1 | Redis total disconnect | API falls back to local rate limiter, reads PostgreSQL directly |
-| Chaos 2 | PostgreSQL latency 500ms + connection choke | Graceful HTTP 503, no process crash |
-| Chaos 3 | Kafka broker killed during checkout | Orders committed in PostgreSQL, outbox delivered after recovery |
-| Chaos 4 | Webhook delay up to 15 minutes | Compensation logic: re-confirm or auto-refund, deterministic |
+| Scenario | Fault Injected                              | Verified Behavior                                               |
+| -------- | ------------------------------------------- | --------------------------------------------------------------- |
+| Chaos 1  | Redis total disconnect                      | API falls back to local rate limiter, reads PostgreSQL directly |
+| Chaos 2  | PostgreSQL latency 500ms + connection choke | Graceful HTTP 503, no process crash                             |
+| Chaos 3  | Kafka broker killed during checkout         | Orders committed in PostgreSQL, outbox delivered after recovery |
+| Chaos 4  | Webhook delay up to 15 minutes              | Compensation logic: re-confirm or auto-refund, deterministic    |
 
 ---
 
@@ -238,13 +239,14 @@ test/
 
 Full observability stack provisioned via Docker Compose:
 
-| Component | Purpose |
-|-----------|---------|
-| Prometheus | Metric scraping from `prom-client` (`/metrics` endpoint) |
-| Grafana | 5 pre-provisioned dashboards as code (JSON) |
+| Component     | Purpose                                                              |
+| ------------- | -------------------------------------------------------------------- |
+| Prometheus    | Metric scraping from `prom-client` (`/metrics` endpoint)             |
+| Grafana       | 5 pre-provisioned dashboards as code (JSON)                          |
 | OpenTelemetry | Trace context propagated across process boundaries via Kafka headers |
 
 **5 Grafana Dashboards:**
+
 1. **Application Health & HTTP Performance** - RPS, error rate, p50/p95/p99 latency
 2. **Database Performance & Connection Pool** - Query latency, lock wait time, pool utilization
 3. **Kafka Health & Consumer Lag** - Broker health, topic lag, outbox backlog
@@ -267,6 +269,7 @@ GitHub Actions workflow with 6 sequential quality gates (`.github/workflows/ci.y
 ```
 
 **Architectural Guardrails** (`dependency-cruiser`):
+
 - No circular dependencies across the entire codebase.
 - Modules may only import from another module's public `index.js` barrel - never from internal `domain/`, `application/`, `infrastructure/`, or `interface/` paths.
 - The `domain/` layer has zero external dependencies (pure TypeScript, no I/O).
@@ -275,26 +278,26 @@ GitHub Actions workflow with 6 sequential quality gates (`.github/workflows/ci.y
 
 ## Tech Stack
 
-| Layer | Technology | Rationale |
-|-------|-----------|-----------|
-| HTTP Framework | Fastify v5 | Plugin encapsulation, built-in schema validation, high throughput |
-| Language | TypeScript 5 (strict) | Zero implicit any, explicit type safety at all boundaries |
-| ORM / Query | Drizzle ORM + node-postgres | Type-safe SQL, raw SQL for critical sections (row locking) |
-| Primary Database | PostgreSQL 16 | ACID transactions, row-level locking, partial unique indexes |
-| Cache / Queue | Redis 7 | ZSET for FIFO waiting room, Lua atomic scripts |
-| Message Broker | Apache Kafka KRaft | At-least-once delivery, consumer group offset management |
-| Kafka Driver | @confluentinc/kafka-javascript | Official Confluent driver with librdkafka bindings |
-| Password Hashing | argon2id | OWASP-recommended parameters (64MB memory, 3 iterations) |
-| Schema Validation | Zod + fastify-type-provider-zod | Runtime validation with TypeScript type inference |
-| Identifier | UUIDv7 | Time-ordered, B-tree index efficient, collision-free |
-| Metrics | prom-client | Prometheus-compatible metrics, custom business counters |
-| Structured Logging | Pino | JSON logs with PII redaction (password, token, authorization) |
-| Package Manager | pnpm | Strict hoisting, workspace support |
-| Test Framework | Vitest | Native ESM, fast execution, compatible with Testcontainers |
-| Integration Tests | Testcontainers | Real infrastructure containers, no mocking of I/O boundaries |
-| Load Testing | k6 | Scripted scenarios with threshold assertions |
-| Chaos Testing | Toxiproxy | Network fault injection (latency, disconnect, jitter) |
-| Arch Validation | dependency-cruiser | Enforce module boundary rules in CI |
+| Layer              | Technology                      | Rationale                                                         |
+| ------------------ | ------------------------------- | ----------------------------------------------------------------- |
+| HTTP Framework     | Fastify v5                      | Plugin encapsulation, built-in schema validation, high throughput |
+| Language           | TypeScript 5 (strict)           | Zero implicit any, explicit type safety at all boundaries         |
+| ORM / Query        | Drizzle ORM + node-postgres     | Type-safe SQL, raw SQL for critical sections (row locking)        |
+| Primary Database   | PostgreSQL 16                   | ACID transactions, row-level locking, partial unique indexes      |
+| Cache / Queue      | Redis 7                         | ZSET for FIFO waiting room, Lua atomic scripts                    |
+| Message Broker     | Apache Kafka KRaft              | At-least-once delivery, consumer group offset management          |
+| Kafka Driver       | @confluentinc/kafka-javascript  | Official Confluent driver with librdkafka bindings                |
+| Password Hashing   | argon2id                        | OWASP-recommended parameters (64MB memory, 3 iterations)          |
+| Schema Validation  | Zod + fastify-type-provider-zod | Runtime validation with TypeScript type inference                 |
+| Identifier         | UUIDv7                          | Time-ordered, B-tree index efficient, collision-free              |
+| Metrics            | prom-client                     | Prometheus-compatible metrics, custom business counters           |
+| Structured Logging | Pino                            | JSON logs with PII redaction (password, token, authorization)     |
+| Package Manager    | pnpm                            | Strict hoisting, workspace support                                |
+| Test Framework     | Vitest                          | Native ESM, fast execution, compatible with Testcontainers        |
+| Integration Tests  | Testcontainers                  | Real infrastructure containers, no mocking of I/O boundaries      |
+| Load Testing       | k6                              | Scripted scenarios with threshold assertions                      |
+| Chaos Testing      | Toxiproxy                       | Network fault injection (latency, disconnect, jitter)             |
+| Arch Validation    | dependency-cruiser              | Enforce module boundary rules in CI                               |
 
 ---
 
@@ -366,11 +369,11 @@ ticket-in/
 
 ## Documentation Index
 
-| Document | Contents |
-|----------|----------|
-| [`docs/architecture.md`](./docs/architecture.md) | Three-process topology, sequence diagrams, state machines, degradation policy |
-| [`docs/database-schema.md`](./docs/database-schema.md) | Full PostgreSQL schema, UUIDv7 convention, partial indexes, outbox/inbox tables |
-| [`docs/api-routes.md`](./docs/api-routes.md) | All REST endpoints, required headers, HTTP status code matrix |
-| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | STRIDE threat model, OWASP ASVS Level 2 controls, bot mitigation |
-| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md) | Windows and Linux setup, Docker Compose profiles |
-| [`docs/PLAN.md`](./docs/PLAN.md) | Full engineering design document: 30-section analysis, ADRs, all phase plans |
+| Document                                                           | Contents                                                                        |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| [`docs/architecture.md`](./docs/architecture.md)                   | Three-process topology, sequence diagrams, state machines, degradation policy   |
+| [`docs/database-schema.md`](./docs/database-schema.md)             | Full PostgreSQL schema, UUIDv7 convention, partial indexes, outbox/inbox tables |
+| [`docs/api-routes.md`](./docs/api-routes.md)                       | All REST endpoints, required headers, HTTP status code matrix                   |
+| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | STRIDE threat model, OWASP ASVS Level 2 controls, bot mitigation                |
+| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md)   | Windows and Linux setup, Docker Compose profiles                                |
+| [`docs/PLAN.md`](./docs/PLAN.md)                                   | Full engineering design document: 30-section analysis, ADRs, all phase plans    |
