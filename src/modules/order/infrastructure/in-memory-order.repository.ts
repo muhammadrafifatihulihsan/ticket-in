@@ -42,6 +42,7 @@ export class InMemoryOrderRepository implements OrderRepositoryPort {
     eventType: string;
     payload: Record<string, unknown>;
   }> = [];
+  public artificialDelayMs = 0;
 
   constructor(
     initialHolds: InMemoryHoldRecord[] = [],
@@ -72,6 +73,10 @@ export class InMemoryOrderRepository implements OrderRepositoryPort {
   }
 
   async createOrderFromHold(params: CreateOrderParams): Promise<OrderWithItems> {
+    if (this.artificialDelayMs > 0) {
+      await new Promise((r) => setTimeout(r, this.artificialDelayMs));
+    }
+
     const targetHoldId = params.holdId ?? (params.holdIds?.[0]);
     if (!targetHoldId) {
       throw new NotFoundError('Reservation hold not found.');
