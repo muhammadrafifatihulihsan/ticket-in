@@ -1,3 +1,5 @@
+import type { FastifyInstance } from 'fastify';
+
 /**
  * RFC 9457 Problem Details object structure.
  */
@@ -113,3 +115,57 @@ export function toProblemDetails(error: unknown, instance?: string): ProblemDeta
     ...(instance ? { instance } : {}),
   };
 }
+
+export function registerProblemDetailsErrorHandler(fastify: FastifyInstance): void {
+  fastify.setErrorHandler(
+    (
+      error: Error & { statusCode?: number; issues?: Array<{ path: (string | number)[]; message: string }> },
+      request,
+      reply,
+    ) => {
+      if (error instanceof DomainError) {
+        const problem = toProblemDetails(error, request.url);
+        return reply
+          .status(error.statusCode)
+          .header('content-type', 'application/problem+json')
+          .send(problem);
+      }
+
+      if (error.name === 'ZodError' && Array.isArray(error.issues)) {
+        const problem: ProblemDetails = {
+          type: 'https://ticket-in.internal/errors/validation-error',
+          title: 'Validation Error',
+          status: 400,
+          detail: 'Request payload validation failed.',
+          instance: request.url,
+          code: 'VALIDATION_ERROR',
+          invalidParams: error.issues.map((i) => ({
+            name: i.path.join('.'),
+            reason: i.message,
+          })),
+        };
+        return reply.status(400).header('content-type', 'application/problem+json').send(problem);
+      }
+
+      const statusCode =
+        typeof error.statusCode === 'number' && error.statusCode >= 400 && error.statusCode < 600
+          ? error.statusCode
+          : 500;
+
+      const problem: ProblemDetails = {
+        type: 'https://ticket-in.internal/errors/internal-server-error',
+        title: 'Internal Server Error',
+        status: statusCode,
+        detail: error.message || 'An unexpected error occurred.',
+        instance: request.url,
+        code: 'INTERNAL_SERVER_ERROR',
+      };
+
+      return reply
+        .status(statusCode)
+        .header('content-type', 'application/problem+json')
+        .send(problem);
+    },
+  );
+}
+

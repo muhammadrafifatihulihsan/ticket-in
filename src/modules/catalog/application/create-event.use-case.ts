@@ -11,7 +11,7 @@ import { validateSeatCategoryInput } from '../domain/seat-category.entity.js';
 export interface CreateEventCommand {
   slug: string;
   title: string;
-  description?: string | null;
+  description?: string | null | undefined;
   venue: string;
   saleStartsAt: Date;
   saleEndsAt: Date;
