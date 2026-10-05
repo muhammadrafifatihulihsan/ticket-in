@@ -3,7 +3,8 @@ import type { OrderStatus, OrderWithItems } from './order.entity.js';
 export interface CreateOrderParams {
   orderId: string;
   userId: string;
-  holdId: string;
+  holdId?: string | undefined;
+  holdIds?: string[] | undefined;
   expiresAt: Date;
 }
 

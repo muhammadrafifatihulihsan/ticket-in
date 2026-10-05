@@ -72,7 +72,11 @@ export class InMemoryOrderRepository implements OrderRepositoryPort {
   }
 
   async createOrderFromHold(params: CreateOrderParams): Promise<OrderWithItems> {
-    const hold = this.holds.get(params.holdId);
+    const targetHoldId = params.holdId ?? (params.holdIds?.[0]);
+    if (!targetHoldId) {
+      throw new NotFoundError('Reservation hold not found.');
+    }
+    const hold = this.holds.get(targetHoldId);
     if (!hold) {
       throw new NotFoundError('Reservation hold not found.');
     }
