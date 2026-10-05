@@ -1,7 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { TokenService } from '../../identity/domain/token-service.port.js';
-import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
-import { requireRole } from '../../identity/interface/rbac.guard.js';
+import { createAuthMiddleware, requireRole, type TokenService } from '../../identity/index.js';
 import type { CreateEventUseCase } from '../application/create-event.use-case.js';
 import type { GetEventDetailsUseCase } from '../application/get-event-details.use-case.js';
 import type { GetEventsUseCase } from '../application/get-events.use-case.js';

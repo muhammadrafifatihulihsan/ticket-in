@@ -1,6 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { TokenService } from '../../identity/domain/token-service.port.js';
-import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
+import { createAuthMiddleware, type TokenService } from '../../identity/index.js';
 import type { GetTicketUseCase } from '../application/get-ticket.use-case.js';
 import type { ListUserTicketsUseCase } from '../application/list-user-tickets.use-case.js';
 import type { VerifyTicketUseCase } from '../application/verify-ticket.use-case.js';

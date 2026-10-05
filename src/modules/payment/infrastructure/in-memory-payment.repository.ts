@@ -1,5 +1,5 @@
 import { NotFoundError } from '../../../platform/errors/problem-details.js';
-import type { InMemoryOrderRepository } from '../../order/infrastructure/in-memory-order.repository.js';
+import type { InMemoryOrderRepository } from '../../order/index.js';
 import type { PaymentRecord } from '../domain/payment.entity.js';
 import type {
   InitiatePaymentParams,

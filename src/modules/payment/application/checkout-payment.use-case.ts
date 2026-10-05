@@ -5,7 +5,7 @@ import {
   NotFoundError,
 } from '../../../platform/errors/problem-details.js';
 import type { IdGenerator } from '../../../platform/id/id-generator.js';
-import type { OrderRepositoryPort } from '../../order/domain/order.repository.port.js';
+import type { OrderRepositoryPort } from '../../order/index.js';
 import type { PaymentRecord } from '../domain/payment.entity.js';
 import type { PaymentRepositoryPort } from '../domain/payment.repository.port.js';
 

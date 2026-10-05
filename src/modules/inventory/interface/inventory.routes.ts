@@ -1,8 +1,9 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { TokenService } from '../../identity/domain/token-service.port.js';
-import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
-import type { AdmissionTokenServicePort } from '../../waiting-room/domain/admission-token.port.js';
-import { createAdmissionTokenMiddleware } from '../../waiting-room/interface/queue.middleware.js';
+import { createAuthMiddleware, type TokenService } from '../../identity/index.js';
+import {
+  createAdmissionTokenMiddleware,
+  type AdmissionTokenServicePort,
+} from '../../waiting-room/index.js';
 import type { AutoHoldSeatsUseCase } from '../application/auto-hold-seats.use-case.js';
 import type { GetEventSeatsUseCase } from '../application/get-event-seats.use-case.js';
 import type { HoldSpecificSeatsUseCase } from '../application/hold-specific-seats.use-case.js';

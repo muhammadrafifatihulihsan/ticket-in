@@ -2,7 +2,7 @@ import {
   InvalidStateTransitionError,
   NotFoundError,
 } from '../../../platform/errors/problem-details.js';
-import type { OrderRepositoryPort } from '../../order/domain/order.repository.port.js';
+import type { OrderRepositoryPort } from '../../order/index.js';
 import type { Ticket } from '../domain/ticket.entity.js';
 import type { TicketRepositoryPort } from '../domain/ticket.repository.port.js';
 

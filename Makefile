@@ -1,4 +1,4 @@
-.PHONY: install dev-api dev-worker dev-sim up-core down-core typecheck lint test build check-invariants
+.PHONY: install dev-api dev-worker dev-sim up-core down-core typecheck lint format-check depcruise test build check-invariants ci
 
 install:
 	npx pnpm install
@@ -24,6 +24,12 @@ typecheck:
 lint:
 	npx pnpm run lint
 
+format-check:
+	npx pnpm run format:check
+
+depcruise:
+	npx pnpm run depcruise
+
 test:
 	npx pnpm test
 
@@ -32,3 +38,5 @@ build:
 
 check-invariants:
 	npx pnpm run db:check-invariants
+
+ci: typecheck lint format-check depcruise test build

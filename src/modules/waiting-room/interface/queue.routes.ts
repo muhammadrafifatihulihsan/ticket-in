@@ -1,7 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify';
-import type { TokenService } from '../../identity/domain/token-service.port.js';
-import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
-import { requireRole } from '../../identity/interface/rbac.guard.js';
+import { createAuthMiddleware, requireRole, type TokenService } from '../../identity/index.js';
 import type { AdmitQueueUseCase } from '../application/admit-queue.use-case.js';
 import type { GetQueueStatusUseCase } from '../application/get-queue-status.use-case.js';
 import type { HeartbeatUseCase } from '../application/heartbeat.use-case.js';

@@ -1,7 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { ValidationError } from '../../../platform/errors/problem-details.js';
-import type { TokenService } from '../../identity/domain/token-service.port.js';
-import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
+import { createAuthMiddleware, type TokenService } from '../../identity/index.js';
 import type { CreateOrderUseCase } from '../application/create-order.use-case.js';
 import type { GetOrderUseCase } from '../application/get-order.use-case.js';
 import type { ListUserOrdersUseCase } from '../application/list-user-orders.use-case.js';

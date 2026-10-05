@@ -1,7 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { UnauthorizedError, ValidationError } from '../../../platform/errors/problem-details.js';
-import type { TokenService } from '../../identity/domain/token-service.port.js';
-import { createAuthMiddleware } from '../../identity/interface/auth.middleware.js';
+import { createAuthMiddleware, type TokenService } from '../../identity/index.js';
 import type { CheckoutPaymentUseCase } from '../application/checkout-payment.use-case.js';
 import type { ProcessPaymentWebhookUseCase } from '../application/process-payment-webhook.use-case.js';
 import { checkoutPaymentBodySchema, paymentWebhookBodySchema } from './payment.schemas.js';

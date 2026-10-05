@@ -3,7 +3,7 @@ import {
   ForbiddenError,
   NotFoundError,
 } from '../../../platform/errors/problem-details.js';
-import type { SeatHoldStatus, SeatStatus } from '../../inventory/domain/seat.entity.js';
+import type { SeatHoldStatus, SeatStatus } from '../../inventory/index.js';
 import {
   assertValidOrderTransition,
   type OrderStatus,
