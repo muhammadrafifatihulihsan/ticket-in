@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev:api",
+      "type": "shell",
+      "command": "pnpm run dev:api",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "dev:worker",
+      "type": "shell",
+      "command": "pnpm run dev:worker",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "dev:simulator",
+      "type": "shell",
+      "command": "pnpm run dev:simulator",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "test",
+      "type": "shell",
+      "command": "pnpm test",
+      "problemMatcher": [],
+      "group": "test"
+    },
+    {
+      "label": "compose:core:up",
+      "type": "shell",
+      "command": "docker compose --profile core up -d",
+      "problemMatcher": []
+    },
+    {
+      "label": "compose:core:down",
+      "type": "shell",
+      "command": "docker compose --profile core down",
+      "problemMatcher": []
+    }
+  ]
+}
