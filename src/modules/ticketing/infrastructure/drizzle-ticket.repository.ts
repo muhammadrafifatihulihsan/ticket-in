@@ -2,7 +2,7 @@ import { desc, eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { v7 as uuidv7 } from 'uuid';
 import * as schema from '../../../platform/db/schema.js';
-import { NotFoundError } from '../../../platform/errors/problem-details.js';
+import { ConflictError, NotFoundError } from '../../../platform/errors/problem-details.js';
 import {
   assertValidTicketTransition,
   generateTicketCode,
@@ -237,6 +237,10 @@ export class DrizzleTicketRepository implements TicketRepositoryPort {
     const existing = await this.findById(ticketId);
     if (!existing) {
       throw new NotFoundError('Ticket not found.');
+    }
+
+    if (existing.status === 'CHECKED_IN' && status === 'CHECKED_IN') {
+      throw new ConflictError('Ticket has already been checked in.');
     }
 
     assertValidTicketTransition(existing.status, status);

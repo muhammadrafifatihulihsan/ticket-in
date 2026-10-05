@@ -1,5 +1,5 @@
 import { v7 as uuidv7 } from 'uuid';
-import { NotFoundError } from '../../../platform/errors/problem-details.js';
+import { ConflictError, NotFoundError } from '../../../platform/errors/problem-details.js';
 import {
   assertValidTicketTransition,
   generateTicketCode,
@@ -25,37 +25,58 @@ export interface MockTicketMetadata {
 export class InMemoryTicketRepository implements TicketRepositoryPort {
   private readonly tickets = new Map<string, Ticket>();
   private readonly seatMetadata = new Map<string, MockTicketMetadata>();
+  private readonly issuingOrders = new Map<string, Promise<Ticket[]>>();
 
   setSeatMetadata(seatId: string, metadata: MockTicketMetadata): void {
     this.seatMetadata.set(seatId, metadata);
   }
 
   async issueTicketsForOrder(params: IssueTicketsParams): Promise<Ticket[]> {
-    // Idempotency: check if tickets for this order already exist
+    // 1. Idempotency: check if tickets for this order already exist
     const existing = await this.findByOrderId(params.orderId);
     if (existing.length > 0) {
       return existing;
     }
 
-    const issuedTickets: Ticket[] = [];
-    const now = new Date();
-
-    for (const item of params.items) {
-      const ticket: Ticket = {
-        id: uuidv7(),
-        orderId: params.orderId,
-        seatId: item.seatId,
-        userId: params.userId,
-        ticketCode: generateTicketCode(now),
-        status: 'ISSUED',
-        issuedAt: now,
-      };
-
-      this.tickets.set(ticket.id, ticket);
-      issuedTickets.push(ticket);
+    // 2. Prevent race conditions: return in-flight promise if another caller is already issuing
+    const inFlight = this.issuingOrders.get(params.orderId);
+    if (inFlight) {
+      return inFlight;
     }
 
-    return issuedTickets;
+    const issuePromise = (async () => {
+      const recheck = await this.findByOrderId(params.orderId);
+      if (recheck.length > 0) {
+        return recheck;
+      }
+
+      const issuedTickets: Ticket[] = [];
+      const now = new Date();
+
+      for (const item of params.items) {
+        const ticket: Ticket = {
+          id: uuidv7(),
+          orderId: params.orderId,
+          seatId: item.seatId,
+          userId: params.userId,
+          ticketCode: generateTicketCode(now),
+          status: 'ISSUED',
+          issuedAt: now,
+        };
+
+        this.tickets.set(ticket.id, ticket);
+        issuedTickets.push(ticket);
+      }
+
+      return issuedTickets;
+    })();
+
+    this.issuingOrders.set(params.orderId, issuePromise);
+    try {
+      return await issuePromise;
+    } finally {
+      this.issuingOrders.delete(params.orderId);
+    }
   }
 
   async findById(ticketId: string): Promise<TicketWithDetails | null> {
@@ -99,6 +120,10 @@ export class InMemoryTicketRepository implements TicketRepositoryPort {
     const ticket = this.tickets.get(ticketId);
     if (!ticket) {
       throw new NotFoundError('Ticket not found.');
+    }
+
+    if (ticket.status === 'CHECKED_IN' && status === 'CHECKED_IN') {
+      throw new ConflictError('Ticket has already been checked in.');
     }
 
     assertValidTicketTransition(ticket.status, status);

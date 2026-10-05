@@ -39,6 +39,16 @@ export class VerifyTicketUseCase {
       );
     }
 
-    return this.ticketRepository.updateStatus(ticket.id, 'CHECKED_IN');
+    try {
+      return await this.ticketRepository.updateStatus(ticket.id, 'CHECKED_IN');
+    } catch (err) {
+      if (err instanceof InvalidStateTransitionError) {
+        const current = await this.ticketRepository.findById(ticket.id);
+        if (current?.status === 'CHECKED_IN') {
+          throw new ConflictError('Ticket has already been checked in.');
+        }
+      }
+      throw err;
+    }
   }
 }
