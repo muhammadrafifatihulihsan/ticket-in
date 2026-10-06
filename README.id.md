@@ -4,7 +4,7 @@
 
 Sistem backend tingkat produksi yang direkayasa untuk menangani **serangan thundering herd** pada penjualan tiket konser: ribuan pengguna secara bersamaan memperebutkan kursi bernomor dalam jumlah terbatas. Sistem menjamin **zero overselling**, **zero tiket ganda**, dan **pemrosesan pembayaran exactly-once** di bawah beban konkurensi ekstrem.
 
-> Dibangun untuk membuktikan kemampuan rekayasa backend tingkat principal engineer: desain sistem terdistribusi, pengendalian konkurensi, keandalan berbasis event, chaos engineering, dan observabilitas penuh.
+> Dibangun untuk membuktikan kemampuan rekayasa backend tingkat principal engineer: desain sistem terdistribusi, pengendalian konkurensi, keandalan berbasis event, chaos engineering dan observabilitas penuh.
 
 ---
 
