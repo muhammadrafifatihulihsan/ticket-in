@@ -40,7 +40,8 @@ Thumbs.db
 # Startup Confidential & Agent Governance (CRITICAL: NEVER COMMIT TO GIT)
 # ==============================================================================
 .agents/
-docs/
+docs/*
+!docs/panduan-setup-lengkap.md
 AGENTS.md
 PRD.md
 SKILL.md

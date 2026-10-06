@@ -369,11 +369,12 @@ ticket-in/
 
 ## Documentation Index
 
-| Document                                                           | Contents                                                                        |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| [`docs/architecture.md`](./docs/architecture.md)                   | Three-process topology, sequence diagrams, state machines, degradation policy   |
-| [`docs/database-schema.md`](./docs/database-schema.md)             | Full PostgreSQL schema, UUIDv7 convention, partial indexes, outbox/inbox tables |
-| [`docs/api-routes.md`](./docs/api-routes.md)                       | All REST endpoints, required headers, HTTP status code matrix                   |
-| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | STRIDE threat model, OWASP ASVS Level 2 controls, bot mitigation                |
-| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md)   | Windows and Linux setup, Docker Compose profiles                                |
-| [`docs/PLAN.md`](./docs/PLAN.md)                                   | Full engineering design document: 30-section analysis, ADRs, all phase plans    |
+| Document                                                           | Contents                                                                                         |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| [`docs/architecture.md`](./docs/architecture.md)                   | Three-process topology, sequence diagrams, state machines, degradation policy                    |
+| [`docs/database-schema.md`](./docs/database-schema.md)             | Full PostgreSQL schema, UUIDv7 convention, partial indexes, outbox/inbox tables                  |
+| [`docs/api-routes.md`](./docs/api-routes.md)                       | All REST endpoints, required headers, HTTP status code matrix                                    |
+| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | STRIDE threat model, OWASP ASVS Level 2 controls, bot mitigation                                 |
+| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md)   | Windows and Linux setup, Docker Compose profiles                                                 |
+| [`docs/panduan-setup-lengkap.md`](./docs/panduan-setup-lengkap.md) | Complete step-by-step setup guide, third-party configuration, migrations, and running the system |
+| [`docs/PLAN.md`](./docs/PLAN.md)                                   | Full engineering design document: 30-section analysis, ADRs, all phase plans                     |

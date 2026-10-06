@@ -369,11 +369,12 @@ ticket-in/
 
 ## Indeks Dokumentasi
 
-| Dokumen                                                            | Isi                                                                          |
-| ------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| [`docs/architecture.md`](./docs/architecture.md)                   | Topologi tiga proses, diagram urutan, state machine, kebijakan degradasi     |
-| [`docs/database-schema.md`](./docs/database-schema.md)             | Skema PostgreSQL lengkap, konvensi UUIDv7, partial index, tabel outbox/inbox |
-| [`docs/api-routes.md`](./docs/api-routes.md)                       | Semua endpoint REST, header yang wajib, matriks kode status HTTP             |
-| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | Model ancaman STRIDE, kontrol OWASP ASVS Level 2, mitigasi bot               |
-| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md)   | Setup Windows dan Linux, Docker Compose profiles                             |
-| [`docs/PLAN.md`](./docs/PLAN.md)                                   | Dokumen desain engineering penuh: 30-seksi analisis, ADR, semua rencana fase |
+| Dokumen                                                            | Isi                                                                                 |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| [`docs/architecture.md`](./docs/architecture.md)                   | Topologi tiga proses, diagram urutan, state machine, kebijakan degradasi            |
+| [`docs/database-schema.md`](./docs/database-schema.md)             | Skema PostgreSQL lengkap, konvensi UUIDv7, partial index, tabel outbox/inbox        |
+| [`docs/api-routes.md`](./docs/api-routes.md)                       | Semua endpoint REST, header yang wajib, matriks kode status HTTP                    |
+| [`docs/security/threat-model.md`](./docs/security/threat-model.md) | Model ancaman STRIDE, kontrol OWASP ASVS Level 2, mitigasi bot                      |
+| [`docs/cross-platform-guide.md`](./docs/cross-platform-guide.md)   | Setup Windows dan Linux, Docker Compose profiles                                    |
+| [`docs/panduan-setup-lengkap.md`](./docs/panduan-setup-lengkap.md) | Panduan langkah demi langkah setup, konfigurasi pihak ketiga, migrasi, dan eksekusi |
+| [`docs/PLAN.md`](./docs/PLAN.md)                                   | Dokumen desain engineering penuh: 30-seksi analisis, ADR, semua rencana fase        |
